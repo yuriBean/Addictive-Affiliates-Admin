@@ -9,15 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "axios": "^1.8.3",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.2.0",
+    "next": "15.1.4",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.1.4"
+    "react-slick": "^0.30.3",
+    "recharts": "^2.15.1",
+    "slick-carousel": "^1.8.1",
+    "stripe": "^17.7.0",
+    "swiper": "^11.2.1"
   },
   "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "@eslint/eslintrc": "^3",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
-    "@eslint/eslintrc": "^3"
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1"
   }
 }

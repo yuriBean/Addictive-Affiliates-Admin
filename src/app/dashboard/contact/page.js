@@ -1,0 +1,174 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { contactUsForm } from "@/app/firebase/firestoreService";
+import { useAuth } from "@/app/context/AuthContext";
+
+export default function ContactPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    businessName: "",
+    email: "",
+    phoneNo: "",
+    message: "",
+  });
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!user) {
+      setErrorMessage("You must be logged in to submit the form.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      await contactUsForm(user.uid, formData);
+      alert("Contact form submitted successfully!");
+
+      setFormData({
+        firstName: "",
+        lastName: "",
+        businessName: "",
+        email: "",
+        phoneNo: "",
+        message: "",
+      });
+
+      router.push('/dashboard/campaigns');
+      
+    } catch (error) {
+      setErrorMessage("Failed to submit form. Try again.");
+      console.error("Error with contact form:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="text-black">
+      <h1 className="text-3xl text-headings font-bold mt-4">Contact Us</h1>
+      <p className="text-xl mb-4">Here is some information about us.</p>
+
+      <div className="space-y-2 my-5">
+        <h2 className="text-xl font-semibold">Our Address</h2>
+        <p className="text-lg mb-4">This will be our address</p>
+      </div>
+
+      <div className="space-y-2 my-5">
+        <h2 className="text-xl font-semibold">Our Phone No.</h2>
+        <p className="text-lg mb-4">0245 23732231</p>
+      </div>
+
+      <p className="text-xl my-4">Or you can email us your queries.</p>
+
+      <div className="flex flex-col space-y-6 justify-center">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="First Name"
+              required
+            />
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="Last Name"
+              required
+            />
+          </div>
+
+          <div>
+            <input
+              type="text"
+              id="businessName"
+              name="businessName"
+              value={formData.businessName}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="Business Name"
+              required
+            />
+          </div>
+
+          <div>
+            <input
+              type="text"
+              id="phoneNo"
+              name="phoneNo"
+              value={formData.phoneNo}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="Phone No."
+              required
+            />
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="Email Address"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <textarea
+              id="message"
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              placeholder="Message"
+              rows={4}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              required
+            />
+          </div>
+
+          {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+
+          <div className="flex justify-start">
+            <button
+              type="submit"
+              className="bg-secondary text-white py-2 px-6 text-xl rounded mt-4"
+              disabled={loading}
+            >
+              {loading ? 'Sending...' : 'Send'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

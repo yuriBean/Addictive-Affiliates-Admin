@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap'); 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +11,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: white;
     --foreground: #ededed;
   }
 }
@@ -17,5 +19,71 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Poppins', sans-serif;
+}
+
+.slick-prev, .slick-next {
+  font-size: 30px !important; 
+  z-index: 1; 
+  opacity: 0.5 !important;
+}
+
+.slick-prev:hover, .slick-next:hover {
+  color: #e0c4ec;
+  opacity: 0.8 !important; 
+}
+
+.slick-dots li button:before {
+  font-size: 16px !important; 
+  color: #000; 
+}
+
+.slick-dots li.slick-active button:before {
+  font-size: 18px !important;
+  
+}
+
+.slick-slide {
+  transform: scale(0.85) rotateY(10deg);
+  opacity: 0.6;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  perspective: 1000px;
+}
+
+.slick-slide:nth-child(even) {
+  transform: scale(0.85) rotateY(-10deg);
+}
+
+.slick-center {
+  transform: scale(0.9) rotateY(0deg);
+  opacity: 1;
+  z-index: 2;
+  transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.slick-active:not(.slick-center) {
+  transform: scale(0.9) rotateY(5deg);
+}
+
+.slick-center .testimonial-card {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
+}
+
+.slick-slide:not(.slick-center) .testimonial-card {
+  box-shadow: none;
+}
+
+.testimonial-container {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.testimonial-card {
+  transition: transform 0.3s ease-in-out;
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
 }
