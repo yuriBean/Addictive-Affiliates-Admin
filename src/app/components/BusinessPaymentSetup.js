@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthLayout from "./AuthLayout";
 import { useAuth } from "../context/AuthContext";
+import { saveStripeAccount, getStripeAccount } from "../firebase/firestoreService";
 import axios from "axios";
 
 const MIN_DEPOSIT = 10; 
@@ -13,6 +14,8 @@ const BusinessPaymentSetup = () => {
     });
 
     const { user } = useAuth();
+    const [stripeAccountId, setStripeAccountId] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -21,6 +24,24 @@ const BusinessPaymentSetup = () => {
             [name]: type === "checkbox" ? checked : value,
         }));
     };
+
+    useEffect(() => {
+        const checkStripeAccount = async () => {
+            if (!user) return;
+            try {
+                const accountId = await getStripeAccount(user.uid);
+                if (accountId) {
+                    setStripeAccountId(accountId);
+                }
+            } catch (error) {
+                console.error("Error fetching Stripe account:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkStripeAccount();
+    }, [user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,21 +57,63 @@ const BusinessPaymentSetup = () => {
         }
 
         try {
+
+            let accountId = stripeAccountId;
+
+            if (!accountId) {
+
+                const accountResponse = await axios.post("/api/create-stripe-account", {
+                    userId: user.uid,
+                    email: user.email,
+                });
+
+                accountId = accountResponse.data?.account?.id;
+                const onboardingUrl = accountResponse.data?.onboardingUrl;
+
+                if (accountId) {
+                    setStripeAccountId(accountId);
+                    await saveStripeAccount(user.uid, accountId);
+            
+                    if (onboardingUrl) {
+                        window.open(onboardingUrl, '_blank');
+                        return;
+                    }
+                } else {
+                    throw new Error("Failed to create Stripe account.");
+                }        
+            }
+
+            const onboardingCompleted = await axios.post("/api/check-onboarding-status", {
+                accountId
+              });
+          
+              if (!onboardingCompleted.data.success) {
+                  alert("Please complete your Stripe onboarding before proceeding.");
+                  setIsLoading(false);
+                  return;
+              }          
+            
             const response = await axios.post("/api/create-payment-session", {
                 userId: user.uid,
                 email: user.email,
                 depositAmount: formData.depositAmount,
                 paymentMethod: formData.paymentMethod,
+                stripeAccountId: accountId,
             });
 
             if (response.data?.session?.url) {
                 window.location.href = response.data.session.url;
             }
+            
         } catch (error) {
             console.error("Error initiating Stripe payment:", error);
             alert("Payment failed. Please try again.");
         }
     };
+
+    if (isLoading) {
+        return <p>Loading...</p>;
+    }
 
     return (
         <AuthLayout width={"max-w-lg"}>

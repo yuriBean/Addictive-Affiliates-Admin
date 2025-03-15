@@ -5,9 +5,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
     try {
-        const { userId, email, depositAmount, paymentMethod } = await req.json();
+        const { userId, email, depositAmount, paymentMethod, stripeAccountId } = await req.json();
 
-        if (!userId || !depositAmount || depositAmount < 10) {
+        if (!userId || !depositAmount || depositAmount < 10 || !stripeAccountId) {
             return NextResponse.json({ error: "Invalid request parameters" }, { status: 400 });
         }
 
@@ -27,7 +27,12 @@ export async function POST(req) {
                 },
             ],
             mode: "payment",
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            payment_intent_data: {
+                transfer_data: {
+                    destination: stripeAccountId, 
+                    amount: depositAmount * 100, 
+                },
+            },            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-cancel`,
             metadata: { userId, depositAmount, paymentMethod },
         });

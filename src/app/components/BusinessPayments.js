@@ -1,20 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
-import { approveTransaction, fetchBalance, fetchRequests, getCampaign } from "@/app/firebase/firestoreService";
+import { approveTransaction, fetchBalance, fetchRequests, getCampaign, getStripeAccount } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function BusinessPayments() {
   const { user } = useAuth();
-  const [balance, setBalance] = useState();
+  const [balance, setBalance] = useState(0);
   const [requests, setRequests] = useState([]);
   const [campaigns, setCampaigns] = useState({});
   const [formData, setFormData] = useState({ paymentMethod: "", email: "", confirmEmail: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedTab, setSelectedTab] = useState("all");
+  const router = useRouter();
 
   useEffect(() => {
     if (!user) return;
-
     const getBalance = async () => {
       if (user.uid){
         const userBalance = await fetchBalance(user.uid);
@@ -57,12 +58,41 @@ export default function BusinessPayments() {
   };
 
   const handleApproveRequest = async (request) => {
-    const success = await approveTransaction(request.id, request.affiliateId, request.businessId, request.amount);
-  
-    if (success) {
-      alert("Transfer request approved!");
+    try {
+
+      const businessStripeAccountId = await getStripeAccount(request.businessId);
+      const affiliateStripeAccountId = await getStripeAccount(request.affiliateId);
+      const response = await fetch("/api/transfer-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestId: request.id,
+          affiliateId: request.affiliateId,
+          businessId: request.businessId,
+          amount: request.amount,
+          businessStripeAccountId: businessStripeAccountId, 
+          affiliateStripeAccountId: affiliateStripeAccountId,
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        await approveTransaction(request.id, request.affiliateId, request.businessId, request.amount);
+        alert("Transfer request approved!");
+      } else {
+        throw new Error(result.message || "Transfer failed");
+      }
+    } catch (error) {
+      alert(error.message);
     }
   };  
+
+  const handleDeposit = async (e) => {
+    e.preventDefault();
+
+    router.push('/deposit');
+  }
 
   return (
     <div className="text-black">
@@ -73,8 +103,13 @@ export default function BusinessPayments() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 flex justify-between items-center mb-3">
           <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Current Balance</p>
-            <p className="text-2xl font-bold">${balance?.currentBalance}</p>
+            <p className="text-2xl font-bold">${balance?.currentBalance?.toFixed(2) || 0}</p>
           </div>
+        </div>
+        <div>
+        <button onClick={handleDeposit} className="bg-secondary text-white py-2 px-6 text-xl rounded-md mt-4">
+              Deposit
+            </button>
         </div>
       </section>
 

@@ -18,7 +18,6 @@ const PaymentSuccess = () => {
         const verifyPaymentAndUpdateBalance = async () => {
             try {
                 const sessionId = searchParams.get("session_id");
-                console.log("Session ID from URL:", sessionId);
                 if (!sessionId) {
                     setError("Invalid session ID.");
                     setLoading(false);

@@ -21,6 +21,7 @@ const BusinessSignUpForm = ({ onNext }) => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -32,6 +33,7 @@ const BusinessSignUpForm = ({ onNext }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
@@ -188,7 +190,7 @@ const BusinessSignUpForm = ({ onNext }) => {
                     type="submit"
                     className="w-full py-2 mt-4 bg-secondary text-white rounded hover:bg-purple-800"
                 >
-                    Create Account
+                    {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
             </form>
 

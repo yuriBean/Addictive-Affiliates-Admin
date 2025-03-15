@@ -1,6 +1,7 @@
 import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc, collectionGroup, query, where, increment, arrayUnion } from "firebase/firestore"; 
 import { app } from './config'; 
 import { format } from "date-fns";
+import { use } from "react";
 
 const db = getFirestore(app);
 
@@ -322,7 +323,6 @@ export const generateAffiliateLink = async (userId, campaignId, productId = null
 
     const finalProductUrl = productUrl ? `${productUrl}?${utmParams.toString()}` : null;
     const business = await getBusinessByCampaignId(campaignId);
-    console.log('khasdh', business.id);
 
     const linkData = {
       affiliateId: userId,
@@ -479,7 +479,6 @@ export const fetchBalance = async (userId) => {
   try {
     const accountRef = doc(db, "accounts", userId);
     const accountSnap = await getDoc(accountRef);
-    console.log ('kashdkhas', accountSnap.data())
     return accountSnap.exists() ? accountSnap.data() : 0;
   } catch (error) {
     console.error("Error fetching balance:", error);
@@ -592,10 +591,22 @@ export const approveTransaction = async (transactionId, affiliateId, businessId,
       status: "completed",
     });
 
-    await updateDoc(affiliateRef, {
-      currentBalance: increment(amount),
-      lifetimeEarnings: increment(amount), 
-    });
+    if (!affiliateSnapshot.exists()) {
+      await setDoc(affiliateRef, {
+        userId: affiliateId,
+        currentBalance: amount,
+        lifetimeEarnings: amount,
+      });
+    } else {
+      await updateDoc(affiliateRef, {
+        currentBalance: increment(amount),
+        lifetimeEarnings: increment(amount),
+      });
+    }
+
+    if (businessSnapshot.data().currentBalance < amount) {
+      throw new Error("Insufficient funds. Please deposit more money.");
+    }
 
     await updateDoc(businessRef, {
       currentBalance: increment(-amount),
@@ -646,17 +657,34 @@ export const updateBusinessDeposit = async (userId, amount) => {
   try {
     const businessRef = doc(db, "accounts", userId);
     const businessSnapshot = await getDoc(businessRef);
+    const stripeAccountRef = doc(db, "stripeAccounts", userId);
+    const stripeAccountSnapshot = await getDoc(stripeAccountRef);
 
     if (!businessSnapshot.exists()) {
       await setDoc(businessRef, {
         currentBalance: amount, 
         lifetimeEarnings: amount, 
-        createdAt: new Date(), 
+        createdAt: new Date(),
+        userId: userId,
       });
     } else {
       await updateDoc(businessRef, {
         currentBalance: increment(amount),
         lifetimeEarnings: increment(amount), 
+      });
+    }
+
+    if (!stripeAccountSnapshot.exists()) {
+      await setDoc(stripeAccountRef, {
+        deposits: [{ amount, date: new Date().toISOString() }],
+        createdAt: new Date(),
+      });
+    } else {
+      await updateDoc(stripeAccountRef, {
+        deposits: arrayUnion({
+          amount,
+          date: new Date().toISOString(),
+        }),
       });
     }
 
@@ -666,3 +694,15 @@ export const updateBusinessDeposit = async (userId, amount) => {
     return false;
   }
 };
+
+export const getStripeAccount = async (userId) => {
+  const userRef = doc(db, "stripeAccounts", userId);
+  const userSnapshot = await getDoc(userRef);
+  return userSnapshot.exists() ? userSnapshot.data().stripeAccountId : null;
+};
+
+export const saveStripeAccount = async (userId, stripeAccountId) => {
+  const userRef = doc(db, "stripeAccounts", userId);
+  await setDoc(userRef, { stripeAccountId });
+};
+

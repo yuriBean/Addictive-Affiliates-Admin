@@ -1,15 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BusinessSignUpForm from "../components/BusinessSignUpForm";
 import Preferences from "../components/Preferences";
 import AuthLayout from "../components/AuthLayout";
 import BusinessPaymentSetup from "../components/BusinessPaymentSetup";
+import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
   const [step, setStep] = useState(1); 
-
+  const router = useRouter();
   const handleNext = () => setStep((prevStep) => prevStep + 1);
   const handleBack = () => setStep((prevStep) => prevStep - 1);
+
+  useEffect(() => {
+    if (step === 3) {
+      router.push("/deposit");
+    }
+  }, [step, router]);
 
   return (
     <div>
@@ -25,7 +32,6 @@ const SignUpPage = () => {
         <Preferences onBack={handleBack} onNext={handleNext} />
         </div>
         </AuthLayout>}
-        {step === 3 && <BusinessPaymentSetup onBack={handleBack} />}
     </div>
   );
 };
