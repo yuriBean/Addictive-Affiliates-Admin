@@ -10,7 +10,7 @@ const Sidebar = () => {
     const router = useRouter();
     const { logout } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [isMobile, setIsMobile] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -18,16 +18,18 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        if (!user) return;
-
-        const handleResize = () => {
+        if (typeof window !== "undefined") {
             setIsMobile(window.innerWidth < 768);
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [user]);
-
+    
+            const handleResize = () => {
+                setIsMobile(window.innerWidth < 768);
+            };
+    
+            window.addEventListener("resize", handleResize);
+            return () => window.removeEventListener("resize", handleResize);
+        }
+    }, []);
+    
     return (
         <div className='relative'>
             {isMobile ? (

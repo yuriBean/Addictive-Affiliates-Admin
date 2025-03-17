@@ -75,7 +75,9 @@ const BusinessPaymentSetup = () => {
                     await saveStripeAccount(user.uid, accountId);
             
                     if (onboardingUrl) {
-                        window.open(onboardingUrl, '_blank');
+                        if (typeof window !== "undefined") {
+                            window.open(onboardingUrl, "_blank");
+                          }
                         return;
                     }
                 } else {
@@ -101,9 +103,9 @@ const BusinessPaymentSetup = () => {
                 stripeAccountId: accountId,
             });
 
-            if (response.data?.session?.url) {
+            if (typeof window !== "undefined" && response.data?.session?.url) {
                 window.location.href = response.data.session.url;
-            }
+              }              
             
         } catch (error) {
             console.error("Error initiating Stripe payment:", error);

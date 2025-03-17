@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import BusinessSignUpForm from "../components/BusinessSignUpForm";
 import Preferences from "../components/Preferences";
 import AuthLayout from "../components/AuthLayout";
-import BusinessPaymentSetup from "../components/BusinessPaymentSetup";
 import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {

@@ -1,5 +1,5 @@
 "use client";
-import { faAngleDown, faAngleUp, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 

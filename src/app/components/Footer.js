@@ -1,3 +1,4 @@
+"use client";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faTwitter, faInstagram, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope, faPhoneVolume } from '@fortawesome/free-solid-svg-icons';

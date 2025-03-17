@@ -1,7 +1,7 @@
+"use client";
 import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc, collectionGroup, query, where, increment, arrayUnion } from "firebase/firestore"; 
 import { app } from './config'; 
 import { format } from "date-fns";
-import { use } from "react";
 
 const db = getFirestore(app);
 
@@ -340,7 +340,7 @@ export const generateAffiliateLink = async (userId, campaignId, productId = null
     const linkRef = collection(db, "affiliateLinks");
     const docRef = await addDoc(linkRef, linkData);
     
-    const baseUrl = window.location.origin;
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
     const link = `${baseUrl}/track?linkId=${docRef.id}`;
     
     return {

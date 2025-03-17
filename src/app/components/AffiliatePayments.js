@@ -142,7 +142,9 @@ export default function AffiliatePayments() {
           await saveStripeAccount(user.uid, accountId);
   
           if (onboardingUrl) {
-              window.open(onboardingUrl, '_blank');
+            if (typeof window !== "undefined") {
+              window.open(onboardingUrl, "_blank");
+            }
               return;
           }
       } else {
