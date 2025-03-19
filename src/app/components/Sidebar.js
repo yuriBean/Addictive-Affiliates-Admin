@@ -35,21 +35,20 @@ const Sidebar = () => {
             {isMobile ? (
                 <>
                     <button
-                        className="md:hidden p-2 rounded-br-lg absolute text-lg left-0 top-0 bg-primary text-white"
+                        className="md:hidden p-2 rounded-br-lg absolute text-lg left-0 top-0 bg-gray-400 text-white"
                         onClick={() => setIsOpen(!isOpen)}
                      >
-                        <FontAwesomeIcon icon={faHamburger} />
+                        <FontAwesomeIcon icon={faHamburger} className='text-sm' />
                     </button>
 
-                    {isOpen && (
-                        <div className="fixed inset-0 z-50 flex">
+                        <div className={`fixed inset-0 z-50 flex transition-transform duration-300 transform ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
                             <button
                                 className="md:hidden p-2 rounded-br-lg absolute text-lg left-0 top-0 bg-primary text-white"
                                 onClick={() => setIsOpen(!isOpen)}
                             >
                                 <FontAwesomeIcon icon={faHamburger} />
                             </button>
-                            <aside className="bg-gradient-to-b from-[#7B35C5] via-[#4C8BCA] to-[#1976D2] text-white w-80 flex flex-col justify-between p-6 h-full">
+                            <aside className="bg-gradient-to-b from-secondary via-[#4C8BCA] to-[#1976D2] text-white w-80 flex flex-col justify-between p-6 h-full">
                                 <div className="flex items-center justify-center mb-8">
                                     <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
                                 </div>
@@ -140,10 +139,9 @@ const Sidebar = () => {
                                 </div>
                             </aside>
                         </div>
-                    )}
                 </>
             ) : (
-                <aside className="bg-gradient-to-b from-[#7B35C5] via-[#4C8BCA] to-[#1976D2] text-white w-64 md:w-80 flex flex-col justify-between p-6 min-h-screen h-full">
+                <aside className="bg-gradient-to-b from-secondary via-[#4C8BCA] to-[#1976D2] text-white w-64 md:w-80 flex flex-col justify-between p-6 min-h-screen h-full">
                     <div className="flex items-center justify-center mb-8">
                         <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
                     </div>

@@ -29,14 +29,12 @@ export default function AddCampaign() {
       try {
         const fetchedUser = await getUser(user.uid);
           if (fetchedUser.role === "affiliate") {
-            router.push("/dashboard/campaigns");
-      setLoading(true);
-          
+            router.push("/dashboard/products");
           }
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching user role:", error);
       }
-
     };
   
     fetchUserRole();
@@ -85,7 +83,7 @@ export default function AddCampaign() {
 
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold my-4">ADD CAMPAIGN</h1>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold my-4">ADD CAMPAIGN</h1>
 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -127,11 +125,11 @@ export default function AddCampaign() {
 
           <div>
             <h2 className="text-lg font-semibold">Campaign Duration</h2>
-            <div className="flex justify-end items-center space-x-3">
-              <p>Ongoing</p>
+            <div className="flex justify-start md:justify-end items-center space-x-3 my-3">
+              <p className="text-sm md:text-lg">Ongoing</p>
               <FontAwesomeIcon
                 icon={formData.ongoing ? faToggleOn : faToggleOff}
-                className="cursor-pointer text-4xl text-secondary"
+                className="cursor-pointer text-2xl md:text-4xl text-secondary"
                 onClick={handleToggle}
               />
             </div>
@@ -149,7 +147,8 @@ export default function AddCampaign() {
             />
           </div>
 
-          {!formData.ongoing && (
+            <div className="overflow-hidden transition-all duration-300 ease-in-out" 
+            style={{ maxHeight: formData.ongoing ? "0px" : "100px", opacity: formData.ongoing ? 0 : 1 }}>       
             <div className="flex flex-col space-y-2">
               <label className="text-xs">End Date</label>
               <input
@@ -161,7 +160,8 @@ export default function AddCampaign() {
                 required
               />
             </div>
-          )}
+            </div>
+
           <button
             type="submit"
             className="bg-secondary w-full py-2 text-white rounded"

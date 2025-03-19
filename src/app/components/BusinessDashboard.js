@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState } from "react";
 import { getAffiliateStats, getAllUserCampaigns } from "@/app/firebase/firestoreService";
 import Link from "next/link";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Tooltip, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, BarChart, Bar, Tooltip, XAxis, YAxis, Legend, ResponsiveContainer } from "recharts";
 
 export default function BusinessDashboardPage() {
   const {user} = useAuth();
@@ -43,28 +43,20 @@ export default function BusinessDashboardPage() {
     revenue: campaign.revenue,
     clicks: campaign.clicks,
   }));
-  console.log("Mapped Campaign Performance Data:", campaignPerformanceData);
 
 
   const productPerformanceData = stats?.topCampaigns.map((product) => ({
     name: product.campaignName,
     conversions: product.conversions,
   })) || [];
-  console.log("Mapped Product Performance Data:", productPerformanceData);
-
-
-  // const trafficSourcesData = stats?.trafficSources.map((source) => ({
-  //   name: source.source,
-  //   visits: source.visits,
-  // })) || [];
 
     return (
       <div className="text-black">
-        <h1 className="text-3xl text-headings font-bold mb-8">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl text-headings font-bold mb-8">Dashboard</h1>
   
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Statistics</h2>
-            <div className=" grid grid-cols-1 md:grid-cols-2 gap-8 flex justify-between items-center ">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 flex justify-between items-center ">
             <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Total Revenue</p>
             <p className="text-2xl font-bold">${stats?.totalRevenue.toFixed(2) || "0.00"}</p>
@@ -99,7 +91,6 @@ export default function BusinessDashboardPage() {
           </div>
         </section>
 
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-3">
               <div className="mb-6 col-span-1">
                 <h3 className="text-lg font-normal">Campaign Performance</h3>
@@ -133,26 +124,15 @@ export default function BusinessDashboardPage() {
               </div>
             </div>
 
-            {/* <div className="mb-6 col-span-1">
-                <h3 className="text-xl font-semibold mb-4">Traffic Sources</h3>
-                <div className="h-40 border border-1 border-gray-400 rounded-lg mt-2">
-                 <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={trafficSourcesData} dataKey="visits" nameKey="name" fill="#8884d8" label />
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer> 
-                </div>
-            </div> */}
-
         </section>
     
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Your Top Campaigns</h2>
-          <div className="my-6 text-right">
-              <Link href="/dashboard/add-campaign" className=" bg-secondary text-white p-4 rounded-lg font-bold">Add Campaign</Link>
+          <div className="my-6 text-left md:text-right">
+              <Link href="/dashboard/add-campaign" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Campaign</Link>
             </div>
           <div className="bg-white p-6 rounded-lg border border-1 border-gray-300 shadow-lg">
+          <div className="overflow-x-auto">
             <table className="md:min-w-full table-auto">
               <thead>
                 <tr className="text-left border-b border-1 border-gray-200">
@@ -179,7 +159,7 @@ export default function BusinessDashboardPage() {
                 ))}
               </tbody>
             </table>
-  
+            </div>
           </div>
         </section>
       </div>

@@ -76,17 +76,15 @@ export default function BuinessCampaigns() {
   
   return (
     <div className="text-black mx-auto max-w-screen">
-      <h1 className="text-headings text-3xl font-bold my-4">MANAGE YOUR CAMPAIGNS</h1>
-      <div className="my-6 text-right">
-        <Link href="/dashboard/add-campaign" className="bg-secondary text-white p-4 rounded-lg font-bold">
-          Add Campaign
-        </Link>
+      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE YOUR CAMPAIGNS</h1>
+      <div className="my-6 text-left md:text-right">
+      <Link href="/dashboard/add-campaign" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Campaign</Link>
       </div>
       <div className="flex flex-col space-y-6 justify-center">
-        <div className="my-4">
+        <div className="my-4 overflow-x-auto">
           <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
             <thead>
-              <tr className="border-b">
+              <tr className="border-b text-sm md:text-lg">
                 <th className="px-4 py-2 text-left bg-accent rounded">Name</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Active</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Start Date</th>
@@ -97,7 +95,7 @@ export default function BuinessCampaigns() {
             </thead>
             <tbody>
               {currentCampaigns.map((campaign) => (
-                <tr key={campaign.id} className="border-b">
+                <tr key={campaign.id} className="border-b text-sm md:text-lg">
                   <td className="px-4 py-2">
                   <Link href={`/dashboard/campaigns/${campaign.id}`} passHref>
                   {campaign.campaignName}
