@@ -317,7 +317,8 @@ export const generateAffiliateLink = async (userId, campaignId, productId = null
       utm_source: "affiliate",
       utm_medium: "referral",
       utm_campaign: campaignId,
-      utm_content: userId
+      utm_content: userId,
+      utm_affiliate_network:"AddictiveAffiliates",
     });
 
     const finalProductUrl = productUrl ? `${productUrl}?${utmParams.toString()}` : null;
