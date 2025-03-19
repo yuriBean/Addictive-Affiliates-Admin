@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons"; 
-import { editProduct, getAllUserCampaigns, getProduct } from "@/app/firebase/firestoreService";
+import { editProduct, getAllUserCampaigns, getProduct, getUser } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
 
 export default function EditProduct() {
@@ -12,12 +12,12 @@ export default function EditProduct() {
   const campaignId = searchParams.get("campaignId");
   const productId = searchParams.get("productId");
   const router = useRouter();
-  const [campaigns, setCampaigns] = useState([]);
 
   const [formData, setFormData] = useState({
     productName: "",
     category: "",
     price: "",
+    productUrl: "",
     description: "",
     assignedCampaign: "",
     assignedCampaignName: "",
@@ -28,6 +28,7 @@ export default function EditProduct() {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [campaigns, setCampaigns] = useState([]);
 
   useEffect(() => {
     if (!user || !campaignId || !productId) return;
@@ -60,6 +61,20 @@ export default function EditProduct() {
       }
     };
 
+    const fetchUserRole = async () => {
+      setLoading(true);
+      try {
+        const fetchedUser = await getUser(user.uid);
+          if (fetchedUser.role === "affiliate") {
+            router.push("/dashboard/products");
+          }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+      }
+    };
+  
+    fetchUserRole();
     fetchCampaigns();
     fetchProduct();
   }, [user, campaignId, productId]);
@@ -112,20 +127,20 @@ export default function EditProduct() {
     }
   };
 
-  if (loading) return <p>Loading product data...</p>;
+  if (loading) return <p className="text-black text-center">Loading...</p>;
 
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold my-4">EDIT PRODUCT</h1>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold my-4">EDIT PRODUCT</h1>
 
       <div className="flex flex-col space-y-6 justify-center">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
+      <form onSubmit={handleSubmit} className="space-y-4 text-sm md:text-md">
+        <input
             type="text"
             name="productName"
             value={formData.productName}
             onChange={handleChange}
-            className="w-full p-4 bg-accent rounded-md"
+            className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
             placeholder="Product Name"
             required
           />
@@ -173,6 +188,16 @@ export default function EditProduct() {
             required
           />
 
+          <input
+            type="text"
+            name="productUrl"
+            value={formData.productUrl}
+            onChange={handleChange}
+            className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+            placeholder="Product URL"
+            required
+          />
+
           <textarea
             id="description"
             name="description"
@@ -209,20 +234,12 @@ export default function EditProduct() {
             </div>
           </div>
 
-          <div className="my-6">
-            <h2 className="text-lg font-semibold">Affiliate Link</h2>
-            <div className="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0 justify-between">
-              <p className="text-gray-600 mt-2">https://example.com/product?product_id=123</p>
-              <button className="bg-secondary w-full md:w-1/6 py-2 text-white rounded">Generate</button>
-            </div>
-          </div>
-
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
           <div className="flex justify-start">
             <button
               type="submit"
-              className="bg-secondary text-white py-2 px-6 text-xl rounded mt-4"
+              className="bg-secondary text-white py-2 px-6 text-sm md:text-xl rounded mt-4"
               disabled={loading}
             >
               {loading ? "Updating..." : "Update Product"}

@@ -79,15 +79,16 @@ export default function BusinessProducts() {
 
   return (
     <div className="text-black mx-auto max-w-screen">
-      <h1 className="text-headings text-3xl font-bold my-4">MANAGE YOUR PRODUCTS</h1>
-      <div className="my-6 text-right">
-        <Link href="/dashboard/add-product" className="bg-secondary text-white p-4 rounded-lg font-bold">Add Product</Link>
+      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE YOUR PRODUCTS</h1>
+      <div className="my-6 text-left md:text-right">
+        <Link href="/dashboard/add-product" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Product</Link>
       </div>
       <div className="flex flex-col space-y-6 justify-center">
         <div className="my-4">
+        <div className="my-4 overflow-x-auto">
           <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
             <thead>
-              <tr className="border-b">
+            <tr className="border-b text-sm md:text-lg">
                 <th className="px-4 py-2 text-left bg-accent rounded">Name</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Active</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Price</th>
@@ -97,7 +98,7 @@ export default function BusinessProducts() {
             </thead>
             <tbody>
               {currentProducts.map((product) => (  
-                <tr key={product.id} className="border-b">
+                <tr key={product.id} className="border-b text-sm md:text-lg">
                   <td className="px-4 py-2">
                   <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`}>
                   {product.productName}
@@ -126,6 +127,7 @@ export default function BusinessProducts() {
               ))}
             </tbody>
           </table>
+          </div>
           <div className="flex justify-center mt-4 space-x-2">
             <button
               className="p-2 rounded-lg disabled:opacity-50"

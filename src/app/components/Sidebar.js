@@ -110,7 +110,7 @@ const Sidebar = () => {
                                             </li>
                                         </a>
 
-                                        <a href={`/dashboard/help`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                                        <a href={`/help`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                             <li className='flex gap-1 items-center'>
                                                 <FontAwesomeIcon icon={faQuestionCircle} className='text-xl ml-2' />
                                                 <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
@@ -202,7 +202,7 @@ const Sidebar = () => {
                                 </li>
                             </a>
 
-                            <a href='/dashboard/help' className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                            <a href='/help' className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                 <li className='flex gap-1 items-center'>
                                     <FontAwesomeIcon icon={faQuestionCircle} className='text-xl ml-2' />
                                     <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">

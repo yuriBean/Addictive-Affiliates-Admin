@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { faToggleOff, faToggleOn } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { editCampaign, getCampaign } from "@/app/firebase/firestoreService";
+import { editCampaign, getCampaign, getUser } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
-import { Suspense } from "react";
 
 export default function EditCampaign() {
   const { user } = useAuth();
@@ -15,7 +14,6 @@ export default function EditCampaign() {
 
   const [formData, setFormData] = useState({
     campaignName: "",
-    products: "",
     commissionRate: "",
     description: "",
     startDate: "",
@@ -48,6 +46,20 @@ export default function EditCampaign() {
       }
     };
 
+    const fetchUserRole = async () => {
+      setLoading(true);
+      try {
+        const fetchedUser = await getUser(user.uid);
+          if (fetchedUser.role === "affiliate") {
+            router.push("/dashboard/products");
+          }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+      }
+    };
+  
+    fetchUserRole();
     fetchCampaign();
   }, [user, campaignId]);
 
@@ -55,7 +67,7 @@ export default function EditCampaign() {
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: name === "commissionRate" ? Number(value) : value,
     }));
   };
 
@@ -68,6 +80,7 @@ export default function EditCampaign() {
 
     setLoading(true);
     setErrorMessage("");
+    
     try {
       await editCampaign(user.uid, campaignId, formData);
       alert("Campaign updated successfully!");
@@ -86,11 +99,11 @@ export default function EditCampaign() {
     }));
   };
 
-  if (loading) return <p>Loading campaign data...</p>;
+  if (loading) return <p className="text-black text-center">Loading...</p>;
 
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold my-4">EDIT CAMPAIGN</h1>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold my-4">EDIT CAMPAIGN</h1>
 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,29 +120,12 @@ export default function EditCampaign() {
           </div>
 
           <div>
-            <select
-              name="products"
-              value={formData.products}
-              onChange={handleChange}
-              className="w-full p-4 bg-accent rounded-md"
-              required
-            >
-              <option>Select Products</option>
-              <option>Product 1</option>
-              <option>Product 2</option>
-              <option>Product 3</option>
-              <option>Product 4</option>
-              <option>Product 5</option>
-            </select>
-          </div>
-
-          <div>
             <input
               type="text"
               name="commissionRate"
               value={formData.commissionRate}
               onChange={handleChange}
-              className="w-full p-4 bg-accent rounded-md"
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               placeholder="Commission Rate"
               required
             />
@@ -141,7 +137,7 @@ export default function EditCampaign() {
               value={formData.description}
               onChange={handleChange}
               rows={4}
-              className="w-full p-4 bg-accent rounded-md"
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               placeholder="Description"
               required
             />
@@ -149,10 +145,11 @@ export default function EditCampaign() {
 
           <div>
             <h2 className="text-lg font-semibold">Campaign Duration</h2>
-            <div className="flex justify-end">
+            <div className="flex justify-start md:justify-end items-center space-x-3 my-3">
+            <p className="text-sm md:text-lg">Ongoing</p>
               <FontAwesomeIcon
                 icon={formData.ongoing ? faToggleOn : faToggleOff}
-                className="cursor-pointer text-4xl text-secondary"
+                className="cursor-pointer text-2xl md:text-4xl text-secondary"
                 onClick={handleToggle}
               />
             </div>
@@ -165,12 +162,13 @@ export default function EditCampaign() {
               name="startDate"
               value={formData.startDate}
               onChange={handleChange}
-              className="w-full p-4 bg-accent rounded-md"
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               required
             />
           </div>
 
-          {!formData.ongoing && (
+          <div className="overflow-hidden transition-all duration-300 ease-in-out" 
+            style={{ maxHeight: formData.ongoing ? "0px" : "100px", opacity: formData.ongoing ? 0 : 1 }}>       
             <div className="flex flex-col space-y-2">
               <label className="text-xs">End Date</label>
               <input
@@ -178,18 +176,18 @@ export default function EditCampaign() {
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="w-full p-4 bg-accent rounded-md"
+                className="w-full p-4 sm:p-6 bg-accent rounded-md"
                 required
               />
             </div>
-          )}
+          </div>
 
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
           <div className="flex justify-start">
             <button
               type="submit"
-              className="bg-secondary text-white py-2 px-6 text-xl rounded mt-4"
+              className="bg-secondary text-white py-2 px-6 text-md md:text-xl rounded mt-4"
             >
               {loading ? "Updating..." : "Update Campaign"}
               </button>

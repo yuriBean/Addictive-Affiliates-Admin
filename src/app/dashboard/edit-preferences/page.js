@@ -7,8 +7,10 @@ export default function EditPreferencesPage() {
   return (
     <Suspense fallback={<p>Loading...</p>}>
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold mt-4">Edit Preferences</h1>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Edit Preferences</h1>
+      <div className="bg-accent rounded-xl p-4 my-5">
       <Preferences />
+      </div>
     </div>
     </Suspense>
   );

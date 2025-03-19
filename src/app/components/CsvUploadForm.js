@@ -53,25 +53,36 @@ export default function CsvUploadForm() {
       const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
 
       const headers = lines[0].split(",");
-      if (headers.length !== 4 || headers[0] !== "Product Name" || headers[1] !== "Category" || headers[2] !== "Price" || headers[3] !== "Description") {
+      if (
+        headers.length !== 5 ||
+        headers[0].trim() !== "Product Name" ||
+        headers[1].trim() !== "Category" ||
+        headers[2].trim() !== "ProductUrl" ||
+        headers[3].trim() !== "Price" ||
+        headers[4].trim() !== "Description"
+      ) {
         setErrorMessage("Invalid CSV format. Please follow the provided format.");
         return;
       }
 
       const products = lines.slice(1).map((line) => {
-        const [productName, category, price, description] = line.split(",");
+        const values = line.split(",");
+        if (values.length !== 5) return null; 
+
+        const [productName, category, productUrl, price, description] = values.map((v) => v.trim());
         return {
-          productName: productName.trim(),
-          category: category.trim(),
-          price: price.trim(),
-          description: description.trim(),
+          productName,
+          category,
+          price,
+          productUrl,
+          description,
           assignedCampaign: selectedCampaign,
           assignedCampaignName: campaigns.find((c) => c.id === selectedCampaign)?.campaignName || "",
           userId: user.uid,
           isActive: false,
           images: [],
         };
-      });
+      }).filter(Boolean);
 
       await bulkAddProducts(selectedCampaign, products);
       alert("Products uploaded successfully!");
@@ -84,14 +95,13 @@ export default function CsvUploadForm() {
   };
 
   return (
-    <div className="border border-gray-400 p-6 rounded-md bg-gray-100">
-      <h2 className="text-xl font-semibold mb-4">Upload CSV File</h2>
+    <div className="border border-gray-400 p-6 text-sm md:text-lg rounded-md bg-gray-100">
 
-      <label className="block mb-2 text-lg font-medium">Select Campaign:</label>
+      <label className="block mb-2 text-sm md:text-lg font-medium">Select Campaign:</label>
       <select
         value={selectedCampaign}
         onChange={handleCampaignChange}
-        className="w-full p-4 bg-white border border-gray-400 rounded-md"
+        className="w-full p-2 md:p-4 bg-white border border-gray-400 rounded-md"
         required
       >
         <option value="">Select a Campaign</option>
@@ -103,12 +113,11 @@ export default function CsvUploadForm() {
       </select>
 
       <div className="bg-gray-200 p-4 rounded-md mt-4">
-        <h3 className="text-lg font-semibold">CSV Format:</h3>
-        <p className="text-sm text-gray-700">Ensure your CSV file follows this format:</p>
-        <pre className="bg-gray-300 p-2 mt-2 rounded-md text-sm">
-          Product Name,Category,Price,Description{"\n"}
-          Sample Product,Electronics,99.99,A great product{"\n"}
-          Another Item,Home,49.99,Useful and affordable
+        <h3 className="text-md md:text-lg font-semibold">CSV Format:</h3>
+        <p className="text-xs md:text-sm text-gray-700">Ensure your CSV file follows this format:</p>
+        <pre className="bg-gray-300 p-2 mt-2 rounded-md text-sm overflow-auto">
+          Product Name--Category--ProductUrl--Price--Description{"\n"}
+          Sample Product--Electronics--url--99.99--A great product{"\n"}
         </pre>
       </div>
 
@@ -116,7 +125,7 @@ export default function CsvUploadForm() {
 
       {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
 
-      <button onClick={handleCsvSubmit} className="mt-4 bg-secondary text-white py-2 px-6 text-lg rounded">
+      <button onClick={handleCsvSubmit} className="bg-secondary text-white py-2 px-6 text-sm md:text-xl rounded mt-4">
         Upload
       </button>
     </div>

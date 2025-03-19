@@ -2,7 +2,7 @@
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { addProduct, getAllUserCampaigns } from "@/app/firebase/firestoreService";
+import { addProduct, getAllUserCampaigns, getUser } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -43,6 +43,20 @@ export default function AddProductForm() {
       }
     };
 
+    const fetchUserRole = async () => {
+      setLoading(true);
+      try {
+        const fetchedUser = await getUser(user.uid);
+          if (fetchedUser.role === "affiliate") {
+            router.push("/dashboard/products");
+          }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+      }
+    };
+  
+    fetchUserRole();
     fetchCampaigns();
   }, [user]);
 
@@ -108,10 +122,12 @@ export default function AddProductForm() {
     }
   };
 
+  if (loading) return <p className="text-black text-center">Loading...</p>;
+
   return (
     <div className="text-black">
       <div className="flex flex-col space-y-6 justify-center">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm md:text-md">
           <input
             type="text"
             name="productName"
@@ -180,16 +196,16 @@ export default function AddProductForm() {
             required
           />
 
-          <label className="w-64 h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
+          <label className="w-64 h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
             <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
-            <FontAwesomeIcon icon={faUpload} className="text-4xl" />
+            <FontAwesomeIcon icon={faUpload} className="text-2xl md:text-4xl" />
             <p className="text-gray-600 mt-2">Click or drag images here</p>
           </label>
 
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
           <div className="flex justify-start">
-            <button type="submit" className="bg-secondary text-white py-2 px-6 text-xl rounded mt-4" disabled={loading}>
+            <button type="submit" className="bg-secondary text-white py-2 px-6 text-sm md:text-xl rounded mt-4" disabled={loading}>
               {loading ? "Adding..." : "Add Product"}
             </button>
           </div>

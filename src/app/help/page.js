@@ -31,11 +31,11 @@ export default function HelpPage() {
 
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold mt-4">Help</h1>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Help</h1>
 
       <div className="space-y-2 my-5">
         <h2 className="text-xl font-semibold">Frequently Asked Questions</h2>
-        <p className="text-lg mb-4">Stuck on something? We are here to help you answer your questions</p>
+        <p className="text-md md:text-lg mb-4">Stuck on something? We are here to help you answer your questions</p>
       </div>
 
       <div className="space-y-4 mt-10">
@@ -43,7 +43,7 @@ export default function HelpPage() {
           <div key={index} className=" space-y-6 p-4 sm:p-6 bg-accent rounded-md pb-4">
             <div 
               onClick={() => handleToggle(index)} 
-              className="cursor-pointer flex justify-between items-center text-xl font-semibold hover:text-primary"
+              className="cursor-pointer flex justify-between items-center text-md md:text-xl font-semibold hover:text-primary"
             >
               <p>{faq.question}</p>
               <FontAwesomeIcon 
@@ -52,7 +52,7 @@ export default function HelpPage() {
               />
             </div>
             {expandedIndex === index && (
-              <p className="text-md mt-2 text-gray-700">{faq.answer}</p>
+              <p className="text-sm md:text-md mt-2 text-gray-700">{faq.answer}</p>
             )}
           </div>
         ))}
