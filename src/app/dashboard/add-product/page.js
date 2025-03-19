@@ -3,14 +3,16 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import AddProductForm from "@/app/components/AddProductForm";
 import CsvUploadForm from "@/app/components/CsvUploadForm";
-import { getUser } from "@/app/firebase/firestoreService";
+import { getStripeAccount, getUser } from "@/app/firebase/firestoreService";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function AddProduct() {
   const { user } = useAuth();
   const [mode, setMode] = useState("manual"); 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [stripeAccountId, setStripeAccountId] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -28,8 +30,54 @@ export default function AddProduct() {
       }
     };
   
+    const checkStripeAccount = async () => {
+      try {
+          const accountId = await getStripeAccount(user?.uid);
+          if (accountId) {
+              setStripeAccountId(accountId);
+          }
+      } catch (error) {
+          console.error("Error fetching Stripe account:", error);
+      } finally {
+          setLoading(false);
+      }
+  };
+
     fetchUserRole();
+    checkStripeAccount();
+
   }, [user]);
+
+  useEffect (()=>{
+    if (!user) return;
+
+    const checkAccount = async () => {
+      if (!stripeAccountId) return;
+      
+      try{
+        setLoading(true);
+        let accountId = stripeAccountId;
+        const onboardingCompleted = await axios.post("/api/check-onboarding-status", {
+        accountId
+      });
+  
+      if (!onboardingCompleted.data.success) {
+          alert("Please complete your Stripe onboarding before proceeding.");
+          setLoading(false);
+          return;
+      } 
+    }
+      catch(error) {
+        throw error;
+      }
+      finally {
+        setLoading(false)
+      }
+    }
+
+    checkAccount();
+
+  }, [user, stripeAccountId]);
 
   if (loading) return <p className="text-black text-center">Loading...</p>;
 

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { contactUsForm } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
+import Sidebar from "../components/Sidebar";
 
 export default function ContactPage() {
   const { user } = useAuth();
@@ -63,25 +64,29 @@ export default function ContactPage() {
   };
 
   return (
+    <div className="flex h-screen overflow-hidden">
+        
+    <Sidebar />
+    <div className="flex-grow p-8 md:p-12 overflow-auto">
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold mt-4">Contact Us</h1>
-      <p className="text-xl mb-4">Here is some information about us.</p>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Contact Us</h1>
+      <p className="text-md md:text-xl mb-4">Here is some information about us.</p>
 
       <div className="space-y-2 my-5">
-        <h2 className="text-xl font-semibold">Our Address</h2>
-        <p className="text-lg mb-4">This will be our address</p>
+        <h2 className="text-lg md:text-xl font-semibold">Our Address</h2>
+        <p className="text-md md:text-xl mb-4">This will be our address</p>
       </div>
 
       <div className="space-y-2 my-5">
-        <h2 className="text-xl font-semibold">Our Phone No.</h2>
-        <p className="text-lg mb-4">0245 23732231</p>
+        <h2 className="text-lg md:text-xl font-semibold">Our Phone No.</h2>
+        <p className="text-md md:text-xl mb-4">0245 23732231</p>
       </div>
 
-      <p className="text-xl my-4">Or you can email us your queries.</p>
+      <p className="text-md md:text-xl my-4">Or you can email us your queries.</p>
 
       <div className="flex flex-col space-y-6 justify-center">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm md:text-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 md:space-y-0 md:gap-4 mb-4">
             <input
               type="text"
               id="firstName"
@@ -161,7 +166,7 @@ export default function ContactPage() {
           <div className="flex justify-start">
             <button
               type="submit"
-              className="bg-secondary text-white py-2 px-6 text-xl rounded mt-4"
+              className="bg-secondary text-white py-2 px-6 text-md md:text-xl rounded mt-4"
               disabled={loading}
             >
               {loading ? 'Sending...' : 'Send'}
@@ -170,5 +175,8 @@ export default function ContactPage() {
         </form>
       </div>
     </div>
+    </div>
+    </div>
+
   );
 }

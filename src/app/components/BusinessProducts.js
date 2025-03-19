@@ -100,8 +100,8 @@ export default function BusinessProducts() {
               {currentProducts.map((product) => (  
                 <tr key={product.id} className="border-b text-sm md:text-lg">
                   <td className="px-4 py-2">
-                  <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`}>
-                  {product.productName}
+                  <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`} title={product.productName}>
+                  {product.productName.length > 20 ? product.productName.slice(0, 25) + "..." : product.productName}
                     </Link>
                     </td>
                   <td className="px-4 py-2">

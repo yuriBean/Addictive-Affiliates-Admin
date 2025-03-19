@@ -2,6 +2,7 @@
 import { faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import Sidebar from "../components/Sidebar";
 
 export default function HelpPage() {
   const [expandedIndex, setExpandedIndex] = useState(null);
@@ -30,6 +31,10 @@ export default function HelpPage() {
   };
 
   return (
+    <div className="flex h-screen overflow-hidden">
+        
+        <Sidebar />
+        <div className="flex-grow p-8 md:p-12 overflow-auto">
     <div className="text-black">
       <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Help</h1>
 
@@ -58,5 +63,8 @@ export default function HelpPage() {
         ))}
       </div>
     </div>
+    </div>
+    </div>
+
   );
 }

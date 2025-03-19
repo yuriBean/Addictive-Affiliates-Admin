@@ -2,9 +2,10 @@
 import { faToggleOff, faToggleOn } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { addCampaign, getUser } from "@/app/firebase/firestoreService";
+import { addCampaign, getStripeAccount, getUser } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function AddCampaign() {
   const { user } = useAuth();
@@ -16,11 +17,12 @@ export default function AddCampaign() {
     endDate: "",
     isActive: false,
     ongoing: false,
-    userId: user.uid,
+    userId: user?.uid,
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [stripeAccountId, setStripeAccountId] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -28,7 +30,7 @@ export default function AddCampaign() {
     const fetchUserRole = async () => {
       setLoading(true);
       try {
-        const fetchedUser = await getUser(user.uid);
+        const fetchedUser = await getUser(user?.uid);
           if (fetchedUser.role === "affiliate") {
             router.push("/dashboard/products");
           }
@@ -37,9 +39,54 @@ export default function AddCampaign() {
         console.error("Error fetching user role:", error);
       }
     };
-  
+
+    const checkStripeAccount = async () => {
+      try {
+          const accountId = await getStripeAccount(user?.uid);
+          if (accountId) {
+              setStripeAccountId(accountId);
+          }
+      } catch (error) {
+          console.error("Error fetching Stripe account:", error);
+      } finally {
+          setLoading(false);
+      }
+  };
+
     fetchUserRole();
+    checkStripeAccount();
   }, [user]);
+
+  useEffect (()=>{
+    if (!user) return;
+
+    const checkAccount = async () => {
+      if (!stripeAccountId) return;
+      
+      try{
+        setLoading(true);
+        let accountId = stripeAccountId;
+        const onboardingCompleted = await axios.post("/api/check-onboarding-status", {
+        accountId
+      });
+  
+      if (!onboardingCompleted.data.success) {
+          alert("Please complete your Stripe onboarding before proceeding.");
+          setLoading(false);
+          return;
+      } 
+    }
+      catch(error) {
+        throw error;
+      }
+      finally {
+        setLoading(false)
+      }
+    }
+
+    checkAccount();
+
+  }, [user, stripeAccountId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
