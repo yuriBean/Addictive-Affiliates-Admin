@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { fetchBalance, fetchTransactions, getStripeAccount, saveStripeAccount, submitWithdrawalRequest } from "@/app/firebase/firestoreService";
+import { fetchBalance, fetchTransactions, getStripeAccount, saveStripeAccount, submitWithdrawalRequest, withdrawFunds } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
 import axios from "axios";
 
@@ -103,7 +103,6 @@ export default function AffiliatePayments() {
       return;
     }
     try {
-      console.log('req', availableBalance);
       const payoutResponse = await axios.post("/api/create-payout", {
         accountId: accountId,
         amount: availableBalance,
@@ -111,6 +110,7 @@ export default function AffiliatePayments() {
   
       if (payoutResponse.data.success) {
         alert("Withdrawal initiated! Funds will arrive in 2-5 business days.");
+        await withdrawFunds(user.uid, availableBalance);
       } else {
         alert("Payout failed: " + payoutResponse.data.error);
       }

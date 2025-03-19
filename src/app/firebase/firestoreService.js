@@ -458,9 +458,16 @@ const getCampaignName = async (campaignId, userId) => {
 export const getAffiliateStats = async (userId) => {
   try {
     const linksRef = collection(db, "affiliateLinks");
-    const q = query(linksRef, where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
+    const affiliateQuery = query(linksRef, where("affiliateId", "==", userId));
+    const businessQuery = query(linksRef, where("businessId", "==", userId));
+
+    const [affiliateSnapshot, businessSnapshot] = await Promise.all([
+      getDocs(affiliateQuery),
+      getDocs(businessQuery)
+    ]);    
     
+    const querySnapshot = [...affiliateSnapshot.docs, ...businessSnapshot.docs];
+
     const stats = {
       totalClicks: 0,
       totalConversions: 0,
@@ -780,5 +787,29 @@ export const getUserPreferences = async (userId) => {
   } catch (error) {
     console.error("Error getting preferences:", error);
     throw error;
+  }
+};
+
+export const withdrawFunds = async (userId, amount) => {
+  if (!userId) throw new Error("User ID is required");
+
+  try {
+    const accountRef = doc(db, "accounts", userId);
+    const accountSnap = await getDoc(accountRef);
+
+    if (!accountSnap.exists()) {
+      throw new Error("Account not found");
+    }
+
+    const accountData = accountSnap.data();
+    const currentBalance = accountData.currentBalance || 0;
+
+    if (currentBalance < amount) {
+      throw new Error("Insufficient balance");
+    }
+    return { success: true, newBalance: currentBalance - amount };
+  } catch (error) {
+    console.error("Error withdrawing funds:", error);
+    return { success: false, error: error.message };
   }
 };
