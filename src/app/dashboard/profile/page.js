@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    businessName: "",
     email: "",
     phone: "",
     oldPassword: "",
@@ -19,27 +20,33 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
   const [username, setUsername] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     if (!user) return;
 
     const fetchUser = async() =>{
       try
       {
+        setLoading(true);
         const fetchedUser = await getUser(user.uid);
         setUsername(fetchedUser.firstName + " " + fetchedUser.lastName);
         setFormData((prev) => ({
           ...prev,
           firstName: fetchedUser.firstName || "",
           lastName: fetchedUser.lastName || "",
+          businessName: fetchedUser.businessName || "",
           email: fetchedUser.email || "",
           phone: fetchedUser.phone || "",
         }));
-  
-    }catch(error){
+        setUserRole(fetchedUser.role);  
+    } catch(error){
       throw error;
-    }}
+    } finally {
+      setLoading(false);
+    }
+  }
 
     fetchUser();
   }, [user]);
@@ -82,9 +89,11 @@ export default function ProfilePage() {
     return name.charAt(0).toUpperCase();
   };
 
+  if (loading) return <p className="text-black text-center">Loading...</p>;
+
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold mt-4">Profile</h1>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Profile</h1>
 
       <div className="flex justify-center flex-col items-center space-y-3 my-6">
         <div
@@ -92,13 +101,27 @@ export default function ProfilePage() {
         >
           {formData.firstName && getFirstLetter(formData.firstName)}
         </div>
-        <p>{username}</p>
+        {userRole === "business" ? (<p>{formData.businessName}</p>) : (<p>{username}</p>)}
         </div>
 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <input
+        <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 md:space-y-0 md:gap-4 mb-4">
+          {userRole === "business" ? (
+            <>
+          <input
+              type="text"
+              id="businessName"
+              name="businessName"
+              value={formData.businessName}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="Business Name"
+            />
+            </>
+          ) : (
+            <>
+          <input
               type="text"
               id="firstName"
               name="firstName"
@@ -116,8 +139,9 @@ export default function ProfilePage() {
               onChange={handleChange}
               className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               placeholder="Last Name"
-              
             />
+            </>
+          )}
           </div>
 
           <div className="flex flex-col space-y-2">
@@ -222,9 +246,9 @@ export default function ProfilePage() {
         </div>
           {/* TODO - Add preferences management here */}
 
-        <div className="flex justify-end my-2 space-x-0 md:space-x-3 space-y-3 flex-col md:flex-row">
-        <button className="border-secondary bg-white text-secondary py-3 w-full md:w-1/6 text-xl md:text-2xl rounded-lg border">Cancel</button>
-        <button className="bg-secondary text-white py-3 w-full md:w-1/6 text-xl md:text-2xl rounded-lg">Save</button>
+        <div className="flex justify-end my-2 space-x-0 md:space-x-3 md:space-y-0 space-y-3 flex-col md:flex-row">
+        <button className="border-secondary bg-white text-secondary py-3 w-full md:w-1/6 text-md md:text-xl rounded-lg border">Cancel</button>
+        <button className="bg-secondary text-white py-3 w-full md:w-1/6 text-md md:text-xl rounded-lg">Save</button>
         </div>
       </div>
     </div>

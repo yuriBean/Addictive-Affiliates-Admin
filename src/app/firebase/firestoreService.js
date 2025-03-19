@@ -1,5 +1,5 @@
 "use client";
-import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc, collectionGroup, query, where, increment, arrayUnion } from "firebase/firestore"; 
+import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc, collectionGroup, query, where, increment, arrayUnion, Timestamp } from "firebase/firestore"; 
 import { app } from './config'; 
 import { format } from "date-fns";
 
@@ -712,13 +712,26 @@ export const saveUserPreferences = async (userId, preferences) => {
   try {
     await setDoc(doc(db, "preferences", userId), {
       preferences,
-      updatedAt: new Date(),
+      updatedAt: Timestamp.now(),
       userId: userId,
-    });
+    },
+    { merge: true });
 
     console.log("Preferences saved successfully!");
   } catch (error) {
     console.error("Error saving preferences:", error);
+    throw error;
+  }
+};
+
+export const getUserPreferences = async (userId) => {
+  if (!userId) throw new Error("User ID is required");
+
+  try {
+    const preferenceSnap = await getDoc(doc(db, "preferences", userId));
+    return preferenceSnap.exists() ? preferenceSnap.data().preferences : null;
+  } catch (error) {
+    console.error("Error getting preferences:", error);
     throw error;
   }
 };

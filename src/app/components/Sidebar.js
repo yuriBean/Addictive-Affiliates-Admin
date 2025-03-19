@@ -48,7 +48,7 @@ const Sidebar = () => {
                             >
                                 <FontAwesomeIcon icon={faHamburger} />
                             </button>
-                            <aside className="bg-gradient-to-b from-secondary via-[#4C8BCA] to-[#1976D2] text-white w-80 flex flex-col justify-between p-6 h-full">
+                            <aside className="overflow-auto bg-gradient-to-b from-secondary via-[#4C8BCA] to-[#1976D2] text-white w-80 flex flex-col justify-between p-6 h-full">
                                 <div className="flex items-center justify-center mb-8">
                                     <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
                                 </div>
@@ -121,7 +121,8 @@ const Sidebar = () => {
                                     </ul>
                                 </nav>
 
-                                <div className="mt-auto text-xl">
+                                <hr></hr>
+                                <div className="mt-auto text-md md:text-xl">
                                     <a
                                         href={`/dashboard/profile`}
                                         className="flex items-center w-full py-2 px-4 rounded transition duration-300"
@@ -213,7 +214,7 @@ const Sidebar = () => {
                         </ul>
                     </nav>
 
-                    <div className="mt-auto text-xl">
+                    <div className="mt-auto text-md md:text-xl">
                         <a
                                         href='/dashboard/profile'
                                         className="flex items-center w-full py-2 px-4 rounded transition duration-300"

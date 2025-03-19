@@ -1,11 +1,31 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { saveUserPreferences } from "../firebase/firestoreService";
+import { getUserPreferences, saveUserPreferences } from "../firebase/firestoreService";
 
 const Preferences = ({ onNext }) => {
   const [selectedPreferences, setSelectedPreferences] = useState([]);
   const { user } = useAuth();
+  const [loading, setLoading] =useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchPreferences = async () => {
+      try {
+        const existingPreferences = await getUserPreferences(user.uid);
+        if (existingPreferences) {
+          setSelectedPreferences(existingPreferences);
+        }
+      } catch (error) {
+        console.error("Error fetching preferences:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPreferences();
+  }, [user]);
 
   const preferences = [
     "Travel", "Technology", "Health", "Fashion",
@@ -26,12 +46,17 @@ const Preferences = ({ onNext }) => {
   const handleSubmit = async () => {
     if (!user) return;
     try {
+      setLoading(true);
       await saveUserPreferences(user.uid, selectedPreferences);
-      onNext();
+      onNext && onNext();
     } catch (error) {
       console.error("Failed to save preferences:", error);
-    } 
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) return <p className="text-black text-center">Loading...</p>;
 
   return (
       <div className="max-w-4xl mx-auto py-8 px-0 md:px-4 lg:px-8">

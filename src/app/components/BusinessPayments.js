@@ -96,18 +96,18 @@ export default function BusinessPayments() {
 
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold mt-4">Payment</h1>
-      <p className="text-xl mb-4">Manage your payment methods and view transaction history.</p>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Payment</h1>
+      <p className="text-md md:text-xl mb-4">Manage your payment methods and view transaction history.</p>
 
       <section className="mb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 flex justify-between items-center mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 flex justify-between items-center ">
           <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Current Balance</p>
             <p className="text-2xl font-bold">${balance?.currentBalance?.toFixed(2) || 0}</p>
           </div>
         </div>
         <div>
-        <button onClick={handleDeposit} className="bg-secondary text-white py-2 px-6 text-xl rounded-md mt-4">
+        <button onClick={handleDeposit} className="bg-secondary text-white py-2 px-6 text-md md:text-xl rounded-md mb-4">
               Deposit
             </button>
         </div>
@@ -141,7 +141,7 @@ export default function BusinessPayments() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-4 sm:p-6 bg-accent rounded-2xl placeholder-gray-700"
+              className="w-full p-4 sm:p-6 bg-accent text-sm md:text-md rounded-2xl placeholder-gray-700"
               placeholder="user@email.com"
               required
             />
@@ -156,39 +156,34 @@ export default function BusinessPayments() {
               value={formData.confirmEmail}
               onChange={handleChange}
               placeholder="user@email.com"
-              className="w-full p-4 sm:p-6 bg-accent rounded-2xl placeholder-gray-700"
+              className="w-full p-4 sm:p-6 bg-accent text-sm md:text-md rounded-2xl placeholder-gray-700"
               required
             />
           </div>
 
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
-          {/* <div className="flex justify-end">
-            <button type="submit" className="bg-secondary text-white py-2 px-6 text-xl rounded-md mt-4">
-              Withdraw
-            </button>
-          </div> */}
         </form>
       </div>
 
-      <div className="my-4 space-y-3">
+      <div className="my-8 md:my-4 space-y-3">
         <h2 className="text-secondary font-semibold text-xl">Requests</h2>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-2 md:gap-4">
           {["all", "completed", "pending", "requested", "rejected"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-6 py-2 rounded-full ${selectedTab === tab ? "bg-secondary text-white" : "bg-white border border-secondary hover:bg-secondary hover:text-white text-black"}`}
+              className={`px-6 py-2 rounded-full text-sm md:text-md ${selectedTab === tab ? "bg-secondary text-white" : "bg-white border border-secondary hover:bg-secondary hover:text-white text-black"}`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
         <div className="flex flex-col space-y-6 justify-center">
-        <div className="my-4">
-        <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
+        <div className="my-4 overflow-x-auto">
+        <table className="min-w-full table-auto border-separate border-spacing-3">
         <thead>
-        <tr className="border-b">
+        <tr className="border-b text-sm md:text-lg">
         <th className="px-4 py-2 text-left bg-accent rounded">Date</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Amount</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Affiliate Email</th>
@@ -200,7 +195,7 @@ export default function BusinessPayments() {
     <tbody>
       {requests.length > 0 ? (
         requests.map((request) => (
-          <tr key={request.id} className="border-b">
+          <tr key={request.id} className="border-b text-sm md:text-lg">
             <td className="px-4 py-2">{new Date(request.date.seconds * 1000).toLocaleDateString()}</td>
             <td className="px-4 py-2">${request.amount.toFixed(2)}</td>
             <td className="px-4 py-2">{request.email}</td>
@@ -225,7 +220,7 @@ export default function BusinessPayments() {
             ))
           ) : (
             <tr>
-              <td colSpan="3" className="text-center py-4 text-gray-500">No pending requests</td>
+              <td colSpan="3" className="text-center py-4 text-md md:text-lg text-gray-500">No pending requests</td>
             </tr>
           )}
     </tbody>
