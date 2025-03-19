@@ -33,11 +33,11 @@ const Footer = () => {
 
           <div className="flex space-x-4 items-center justify-center sm:justify-start mb-4">
             <FontAwesomeIcon icon={faPhoneVolume} size="2x" className="text-secondary" />
-            <p className="text-lg">09127821785</p>
+            <p className="text-md md:text-lg">+1 7325038255</p>
           </div>
           <div className="flex space-x-4 items-center justify-center sm:justify-start">
             <FontAwesomeIcon icon={faEnvelope} size="2x" className="text-secondary" />
-            <p className="text-lg">hello@gmail.com</p>
+            <p className="text-md md:text-lg">admin@addictiveaffiliates.com</p>
           </div>
         </div>
       </div>

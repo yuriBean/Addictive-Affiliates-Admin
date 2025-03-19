@@ -52,7 +52,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
                 role: 'advertiser',
             }
             const user = await signUp(formData.email, formData.password, additionalData);
-            // await login(email, password);
+            await login(email, password);
             console.log("User created successfully!", user);
             onNext(); 
         } catch (error) {
@@ -63,13 +63,13 @@ const AffiliateSignUpForm = ({ onNext }) => {
 
     return (
         <AuthLayout width={'max-w-2xl'}>
-            <h1 className="text-3xl font-bold text-center text-primary mb-4">SIGN UP</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-4">SIGN UP</h1>
             <p className="text-center mb-6 text-sm text-gray-600">Let’s get you all set up so you can access your account.</p>
             
             <form onSubmit={handleSubmit} className='text-black'>
 
-                <div className="flex space-x-4 mb-4">
-                    <div className="w-1/2">
+            <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 md:space-y-0 md:gap-4 mb-4">
+                    <div>
                         <label className="block text-sm font-medium " htmlFor="firstName">
                             First Name
                         </label>
@@ -83,7 +83,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
                             required
                         />
                     </div>
-                    <div className="w-1/2">
+                    <div>
                         <label className="block text-sm font-medium " htmlFor="lastName">
                             Last Name
                         </label>
@@ -99,8 +99,8 @@ const AffiliateSignUpForm = ({ onNext }) => {
                     </div>
                 </div>
 
-                <div className="flex space-x-4 mb-4">
-                    <div className="w-1/2">
+                <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 md:space-y-0 md:gap-4 mb-4">
+                    <div>
                         <label className="block text-sm font-medium " htmlFor="email">
                             Email Address
                         </label>
@@ -114,7 +114,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
                             required
                         />
                     </div>
-                    <div className="w-1/2">
+                    <div>
                         <label className="block text-sm font-medium " htmlFor="phone">
                             Phone Number
                         </label>
@@ -209,7 +209,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
                 </button>
             </form>
 
-            <div className="mt-4 space-y-2 text-center">
+            <div className="mt-10 space-y-2 text-center">
                 <p className="text-sm text-black ">
                     Already have an account? <a href="/login" className="text-secondary font-bold">Login</a>
                 </p>
@@ -225,18 +225,18 @@ const AffiliateSignUpForm = ({ onNext }) => {
 </div>
 
             <div className="flex flex-col md:flex-row justify-center space-x-0 md:space-x-4 space-y-3 md:space-y-0 mb-4">
-                <div className='border-2 border-secondary px-12 py-2 rounded'>
-                    <button className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white">
+                <div className='border-2 border-secondary px-12 py-2 rounded flex items-center justify-center'>
+                    <button className="w-8 h-8 rounded-full bg-blue-600 text-white">
                         <FontAwesomeIcon icon={faFacebook} />
                     </button>
                 </div>
-                <div className='border-2 border-secondary px-12 py-2 rounded'>
-                    <button className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white">
+                <div className='flex items-center justify-center border-2 border-secondary px-12 py-2 rounded'>
+                    <button className="w-8 h-8 rounded-full bg-indigo-600 text-white">
                         <FontAwesomeIcon icon={faGoogle} />
                     </button>
                 </div>
-                <div className='border-2 border-secondary px-12 py-2 rounded'>
-                    <button className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
+                <div className='flex items-center justify-center border-2 border-secondary px-12 py-2 rounded'>
+                    <button className="w-8 h-8 rounded-full bg-black text-white">
                         <FontAwesomeIcon icon={faApple} />
                     </button>
                 </div>

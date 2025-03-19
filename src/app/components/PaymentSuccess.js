@@ -52,13 +52,13 @@ const PaymentSuccess = () => {
     }, [user]);
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
+        <div className="flex flex-col items-center justify-center max-w-screen h-screen">
             {loading ? (
-                <h1 className="text-2xl font-bold text-green-600">Processing your payment...</h1>
+                <h1 className="text-2xl font-bold text-primary">Processing your payment...</h1>
             ) : error ? (
                 <h1 className="text-2xl font-bold text-red-600">{error}</h1>
             ) : (
-                <h1 className="text-2xl font-bold text-green-600">Payment Successful! Redirecting...</h1>
+                <h1 className="text-2xl font-bold text-primary">Payment Successful! Redirecting...</h1>
             )}
         </div>
     );

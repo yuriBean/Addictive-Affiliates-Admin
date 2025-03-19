@@ -20,16 +20,8 @@ const SignUpPage = () => {
   return (
     <div>
         {step === 1 && <BusinessSignUpForm onNext={handleNext} />}
-        {step === 2 && <AuthLayout width={'max-w-screen md:mx-10'}>
-        <div className="max-w-4xl mx-auto py-10 px-6">
-        <h1 className="text-3xl font-bold text-center text-primary mb-6">
-          PRODUCT CATEGORIES
-        </h1>
-        <p className="text-center mb-6 text-sm text-gray-600">
-        Select the categories that best represent the products your business offers to help connect with the right affiliates.        
-        </p>
+        {step === 2 && <AuthLayout width={'max-w-screen md:mx-10'}>          
         <Preferences onBack={handleBack} onNext={handleNext} />
-        </div>
         </AuthLayout>}
     </div>
   );

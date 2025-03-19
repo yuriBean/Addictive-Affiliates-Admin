@@ -45,7 +45,7 @@ const BusinessPaymentSetup = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setIsLoading(true);
         if (!formData.paymentMethod) {
             alert("Please select a payment method.");
             return;
@@ -61,7 +61,6 @@ const BusinessPaymentSetup = () => {
             let accountId = stripeAccountId;
 
             if (!accountId) {
-
                 const accountResponse = await axios.post("/api/create-stripe-account", {
                     userId: user.uid,
                     email: user.email,
@@ -106,10 +105,11 @@ const BusinessPaymentSetup = () => {
             if (typeof window !== "undefined" && response.data?.session?.url) {
                 window.location.href = response.data.session.url;
               }              
-            
         } catch (error) {
             console.error("Error initiating Stripe payment:", error);
             alert("Payment failed. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -119,7 +119,7 @@ const BusinessPaymentSetup = () => {
 
     return (
         <AuthLayout width={"max-w-lg"}>
-            <h1 className="text-3xl font-bold text-primary mb-4">DEPOSIT FUNDS</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-primary mb-4">DEPOSIT FUNDS</h1>
             <hr className="mb-6 border-2 rounded-full border-black" />
 
             <form onSubmit={handleSubmit} className="text-black">

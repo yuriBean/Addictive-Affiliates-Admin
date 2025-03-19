@@ -36,16 +36,14 @@ const ContactSection = () => {
           </p>
           <div className="font-bold">
           <div className="flex space-x-4 items-center my-4 justify-center sm:justify-start">
-            <FontAwesomeIcon icon={faLocationDot} size="2x" className="text-secondary" />
-            <p className="text-lg">1055 Arthur ave Elk Groot, 67. New Palmas South Carolina.</p>
-          </div>
-          <div className="flex space-x-4 items-center my-4 justify-center sm:justify-start">
             <FontAwesomeIcon icon={faPhoneVolume} size="2x" className="text-secondary" />
-            <p className="text-lg">+1 234 678 9108 99</p>
+            <p className="text-md md:text-lg">+1 7325038255</p>
           </div>
           <div className="flex space-x-4 items-center my-4 justify-center sm:justify-start">
             <FontAwesomeIcon icon={faEnvelope} size="2x" className="text-secondary" />
-            <p className="text-lg">Contact@moralizer.com</p>
+            <p className="text-md md:text-lg">
+            admin@addictiveaffiliates.com
+              </p>
           </div>
           </div>
         </div>

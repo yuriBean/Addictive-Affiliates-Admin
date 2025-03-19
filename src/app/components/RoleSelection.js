@@ -47,7 +47,7 @@ const RoleSelection = () => {
               <div className="bg-[#e0c4ec] p-6 md:p-10 rounded-lg flex justify-center ">
                 <div className="bg-white p-4 sm:p-6 rounded-lg flex justify-center h-full md:h-full min-h-[400px] md:min-h-[300px]">
                   <Link
-                    href="/affiliate-signup"
+                    href="/signup"
                     className="p-4 rounded-lg shadow-lg flex flex-col items-center justify-center transition-all duration-300"
                   >
                     <Image

@@ -1,9 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import AuthLayout from "./AuthLayout";
+import { useAuth } from "../context/AuthContext";
+import { saveUserPreferences } from "../firebase/firestoreService";
 
 const Preferences = ({ onNext }) => {
   const [selectedPreferences, setSelectedPreferences] = useState([]);
+  const { user } = useAuth();
 
   const preferences = [
     "Travel", "Technology", "Health", "Fashion",
@@ -21,26 +23,30 @@ const Preferences = ({ onNext }) => {
     );
   };
 
-  const handleSubmit = () => {
-    console.log("Selected Preferences:", selectedPreferences);
-    onNext();
+  const handleSubmit = async () => {
+    if (!user) return;
+    try {
+      await saveUserPreferences(user.uid, selectedPreferences);
+      onNext();
+    } catch (error) {
+      console.error("Failed to save preferences:", error);
+    } 
   };
 
   return (
-    // <AuthLayout width={'max-w-screen md:mx-10'}>
-      <div className="max-w-4xl mx-auto py-10 px-6">
-        {/* <h1 className="text-3xl font-bold text-center text-primary mb-6">
-          SET YOUR PREFERENCES
+      <div className="max-w-4xl mx-auto py-8 px-0 md:px-4 lg:px-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-6">
+          PRODUCT CATEGORIES
         </h1>
         <p className="text-center mb-6 text-sm text-gray-600">
-          Choose your preferences to personalize campaigns and connect with opportunities that align with your interests.
-        </p> */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8 max-w-7xl">
+        Select the categories that best represent the products your business offers to help connect with the right affiliates.        
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {preferences.map((preference) => (
             <div
               key={preference}
               onClick={() => togglePreference(preference)}
-              className={`w-full h-24 border rounded cursor-pointer text-center flex items-center justify-center text-lg font-medium ${
+              className={`p-4 py-8 md:py-10 border rounded-md cursor-pointer text-center flex items-center justify-center text-sm sm:text-lg font-medium transition-all duration-200 ${
                 selectedPreferences.includes(preference)
                   ? "bg-secondary text-white"
                   : "bg-[#DFD9F1B0] text-gray-800"
@@ -50,7 +56,7 @@ const Preferences = ({ onNext }) => {
             </div>
           ))}
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-6">
           <button
             onClick={handleSubmit}
             className="py-2 px-6 w-full max-w-7xl bg-secondary text-white rounded hover:bg-purple-800"
@@ -59,7 +65,6 @@ const Preferences = ({ onNext }) => {
           </button>
         </div>
       </div>
-    // </AuthLayout>
   );
 };
 

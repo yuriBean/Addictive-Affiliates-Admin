@@ -18,7 +18,7 @@ const AuthLayout = ({ children, width }) => {
                 <div>
                     <Link href="/contact">
                     <button 
-                    className='text-black p-3 px-6 text-lg rounded-xl font-medium' style={{ backgroundColor: 'rgba(255, 255, 255, 0.46)'}}>
+                    className='text-black p-3 px-6 text-md md:text-lg rounded-xl font-medium' style={{ backgroundColor: 'rgba(255, 255, 255, 0.46)'}}>
                         Contact Us
                     </button>
                     </Link>

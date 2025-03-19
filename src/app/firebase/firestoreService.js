@@ -706,3 +706,19 @@ export const saveStripeAccount = async (userId, stripeAccountId) => {
   await setDoc(userRef, { stripeAccountId });
 };
 
+export const saveUserPreferences = async (userId, preferences) => {
+  if (!userId) throw new Error("User ID is required");
+
+  try {
+    await setDoc(doc(db, "preferences", userId), {
+      preferences,
+      updatedAt: new Date(),
+      userId: userId,
+    });
+
+    console.log("Preferences saved successfully!");
+  } catch (error) {
+    console.error("Error saving preferences:", error);
+    throw error;
+  }
+};

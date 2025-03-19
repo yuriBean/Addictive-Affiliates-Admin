@@ -17,18 +17,18 @@ const Sidebar = () => {
         router.push('/login');
     };
 
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setIsMobile(window.innerWidth < 768);
-    
-            const handleResize = () => {
-                setIsMobile(window.innerWidth < 768);
-            };
-    
-            window.addEventListener("resize", handleResize);
-            return () => window.removeEventListener("resize", handleResize);
-        }
-    }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMobile(window.innerWidth < 768);
+
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
     
     return (
         <div className='relative'>
@@ -37,7 +37,7 @@ const Sidebar = () => {
                     <button
                         className="md:hidden p-2 rounded-br-lg absolute text-lg left-0 top-0 bg-primary text-white"
                         onClick={() => setIsOpen(!isOpen)}
-                    >
+                     >
                         <FontAwesomeIcon icon={faHamburger} />
                     </button>
 
@@ -93,7 +93,7 @@ const Sidebar = () => {
                                             </li>
                                         </a>
 
-                                        <a href={`/dashboard/contact`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                                        <a href={`/contact`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                             <li className='flex gap-1 items-center'>
                                                 <FontAwesomeIcon icon={faContactBook} className='text-xl ml-2' />
                                                 <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
@@ -186,7 +186,7 @@ const Sidebar = () => {
                                 </li>
                             </a>
 
-                            <a href='/dashboard/contact' className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                            <a href='/contact' className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                 <li className='flex gap-1 items-center'>
                                     <FontAwesomeIcon icon={faContactBook} className='text-xl ml-2' />
                                     <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
