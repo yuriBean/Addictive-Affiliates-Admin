@@ -1,10 +1,22 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faApple, faFacebook, faGoogle, faTwitter, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import AuthLayout from './AuthLayout';
+import { useAuth } from '../context/AuthContext';
+import { saveSocialLink } from '../firebase/firestoreService';
 
 const ConnectSocialMedia = ({ onNext, onBack }) => {
+    const { user } = useAuth();
+    const [socialLinks, setSocialLinks] = useState({
+        Facebook: "",
+        Google: "",
+        Apple: "",
+        Twitter: "",
+        LinkedIn: "",
+    });
+    const [inputVisible, setInputVisible] = useState({});
+
     const socialOptions = [
         { name: 'Facebook', icon: faFacebook, color: 'bg-blue-600' },
         { name: 'Google', icon: faGoogle, color: 'bg-indigo-600' },
@@ -13,38 +25,74 @@ const ConnectSocialMedia = ({ onNext, onBack }) => {
         { name: 'LinkedIn', icon: faLinkedin, color: 'bg-blue-800' },
     ];
 
-    const handleConnect = (platform) => {
-        alert(`Connecting to ${platform}`);
-        onNext();
+    const handleChange = (platform, value) => {
+        setSocialLinks((prev) => ({ ...prev, [platform]: value }));
+    };
+
+    const handleSave = async (platform) => {
+        if (!user || !user.uid) {
+            alert("You must be logged in to save social links.");
+            return;
+        }
+
+        if (!socialLinks[platform]) {
+            alert(`Please enter your ${platform} link.`);
+            return;
+        }
+        const success = await saveSocialLink(user.uid, platform, socialLinks[platform]);
+        setInputVisible((prev) => ({ ...prev, [platform]: false }));
+        if (success) onNext();
+    };
+
+    const handleConnectClick = (platform) => {
+        setInputVisible((prev) => ({ ...prev, [platform]: true })); 
     };
 
     return (
         <AuthLayout width={'max-w-2xl'}>
-            <h1 className="text-3xl font-bold text-center text-primary mb-4">CONNECT YOUR SOCIAL MEDIA</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-4">
+                CONNECT YOUR SOCIAL MEDIA
+            </h1>
             <p className="text-center mb-6 text-sm text-gray-600">
-            Link your social media accounts to showcase your reach.
+                Link your social media accounts to showcase your reach.
             </p>
 
-            <div className="flex flex-col space-y-4">
-                {socialOptions.map(({ name, icon, color }) => (
-                    <div
-                        key={name}
-                        className="flex items-center justify-between bg-white p-4 border border-secondary rounded"
-                    >
-                        <div className="flex items-center space-x-4">
-                            <div
-                                className={`w-10 h-10 flex items-center justify-center text-secondary text-xl`}
-                            >
-                                <FontAwesomeIcon icon={icon} />
-                            </div>
-                            <span className="font-medium text-gray-800">{name}</span>
+            <div className="space-y-4">
+                {socialOptions.map(({ name, icon }) => (
+                    <div key={name} className="w-full flex items-center bg-white p-4 border border-secondary rounded-md">
+                        <div className={`w-10 h-10 flex items-center justify-start text-secondary text-xl`}>
+                            <FontAwesomeIcon icon={icon} />
                         </div>
-                        <button
-                            className="py-2 px-6 bg-secondary text-white rounded hover:bg-purple-800"
-                            onClick={() => handleConnect(name)}
-                        >
-                            Connect
-                        </button>
+
+                        <div className="flex-1 ml-4">
+                            {inputVisible[name] ? (
+                                <div className="flex flex-col gap-2 w-full">
+                                    <input
+                                        type="url"
+                                        placeholder={`Enter ${name} profile link`}
+                                        className="p-2 border border-gray-300 rounded-md text-black text-sm md:text-lg outline-none"
+                                        value={socialLinks[name] || ""}
+                                        onChange={(e) => handleChange(name, e.target.value)}
+                                    />
+                                    <button
+                                        className=" p-2 bg-secondary text-white text-sm rounded-md hover:bg-purple-800"
+                                        onClick={() => handleSave(name)}
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium text-gray-800 text-sm md:text-lg">{name}</span>
+                                    <button
+                                        className="px-4 py-2 bg-secondary text-white text-sm rounded-md hover:bg-purple-800"
+                                        onClick={() => handleConnectClick(name)}
+                                    >
+                                        Connect
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>

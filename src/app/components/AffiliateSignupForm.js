@@ -52,7 +52,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
                 role: 'advertiser',
             }
             const user = await signUp(formData.email, formData.password, additionalData);
-            await login(email, password);
+            await login(formData.email, formData.password);
             console.log("User created successfully!", user);
             onNext(); 
         } catch (error) {

@@ -813,3 +813,18 @@ export const withdrawFunds = async (userId, amount) => {
     return { success: false, error: error.message };
   }
 };
+
+export const saveSocialLink = async (userId, platform, link) => {
+  try {
+      if (!userId) throw new Error("User not logged in");
+
+      const socialRef = doc(db, "socialMedia", userId);
+      await setDoc(socialRef, { [platform]: link, userId }, { merge: true });
+
+      alert(`${platform} link saved successfully!`);
+      return {success: true}
+  } catch (error) {
+      console.error("Error saving social link:", error);
+      alert("Failed to save social link. Please try again.");
+  }
+};

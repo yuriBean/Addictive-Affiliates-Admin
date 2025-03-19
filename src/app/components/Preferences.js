@@ -60,12 +60,6 @@ const Preferences = ({ onNext }) => {
 
   return (
       <div className="max-w-4xl mx-auto py-8 px-0 md:px-4 lg:px-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-6">
-          PRODUCT CATEGORIES
-        </h1>
-        <p className="text-center mb-6 text-sm text-gray-600">
-        Select the categories that best represent the products your business offers to help connect with the right affiliates.        
-        </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {preferences.map((preference) => (
             <div
