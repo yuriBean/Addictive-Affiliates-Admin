@@ -13,15 +13,24 @@ export default function BusinessPayments() {
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedTab, setSelectedTab] = useState("all");
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
+    
     const getBalance = async () => {
+      try{ 
+        setLoading(true)
       if (user.uid){
         const userBalance = await fetchBalance(user.uid);
         setBalance(userBalance);
       }
+    } catch (error) { 
+      throw error; 
+    } finally { 
+      setLoading(false); 
     }
+  }
     
     const getRequests = async () => {
         if (user.uid){
@@ -93,6 +102,8 @@ export default function BusinessPayments() {
 
     router.push('/deposit');
   }
+
+  if (loading) return <p className="text-black text-center">Loading...</p>;
 
   return (
     <div className="text-black">

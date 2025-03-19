@@ -2,13 +2,14 @@
 import { useEffect, useState } from "react";
 import { updateUserPassword } from "@/app/firebase/auth";
 import { useAuth } from "@/app/context/AuthContext";
-import { updateUser, getUser } from "@/app/firebase/firestoreService";
+import { updateUser, getUser, getUserPreferences } from "@/app/firebase/firestoreService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebook, faInstagram, faTiktok, faTwitter, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const [selectedPreferences, setSelectedPreferences] = useState([]);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -48,7 +49,21 @@ export default function ProfilePage() {
     }
   }
 
-    fetchUser();
+  const fetchPreferences = async () => {
+    try {
+      const existingPreferences = await getUserPreferences(user.uid);
+      if (existingPreferences) {
+        setSelectedPreferences(existingPreferences);
+      }
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchUser();
+  fetchPreferences();
   }, [user]);
   
   const [errorMessage, setErrorMessage] = useState("");
@@ -106,9 +121,8 @@ export default function ProfilePage() {
 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 md:space-y-0 md:gap-4 mb-4">
           {userRole === "business" ? (
-            <>
+        <div className="grid grid-cols-1 mb-4">
           <input
               type="text"
               id="businessName"
@@ -118,9 +132,9 @@ export default function ProfilePage() {
               className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               placeholder="Business Name"
             />
-            </>
+            </div>
           ) : (
-            <>
+            <div className="grid grid-cols-1 md:grid-cols-2 space-y-4 md:space-y-0 md:gap-4 mb-4">
           <input
               type="text"
               id="firstName"
@@ -140,9 +154,8 @@ export default function ProfilePage() {
               className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               placeholder="Last Name"
             />
-            </>
+            </div>
           )}
-          </div>
 
           <div className="flex flex-col space-y-2">
             <input
@@ -216,7 +229,7 @@ export default function ProfilePage() {
           <div className="flex justify-start">
             <button
               type="submit"
-              className="bg-secondary text-white py-2 px-6 text-xl rounded mt-4"
+              className="bg-secondary text-white py-2 px-6 text-md md:text-xl rounded mt-4"
             >
               Update Profile
             </button>
@@ -224,29 +237,43 @@ export default function ProfilePage() {
         </form>
       </div>
 
-      <div className="my-10">
-        <h2 className="text-xl font-semibold">Social Media Accounts</h2>
-        <div className="flex flex-col space-y-5 p-5 text-4xl justify-start items-start">
+      {/* <div className="my-10"> */}
+        {/* <h2 className="text-xl font-semibold">Social Media Accounts</h2> */}
+        {/* <div className="flex flex-col space-y-5 p-5 text-4xl justify-start items-start"> */}
           {/* TODO - add social media logic */}
-          <FontAwesomeIcon icon={faInstagram} />
-          <FontAwesomeIcon icon={faFacebook} />
-          <FontAwesomeIcon icon={faYoutube} />
-          <FontAwesomeIcon icon={faTwitter} />
-          <FontAwesomeIcon icon={faTiktok} />
-        </div>
+          {/* <FontAwesomeIcon icon={faInstagram} /> */}
+          {/* <FontAwesomeIcon icon={faFacebook} /> */}
+          {/* <FontAwesomeIcon icon={faYoutube} /> */}
+          {/* <FontAwesomeIcon icon={faTwitter} /> */}
+          {/* <FontAwesomeIcon icon={faTiktok} /> */}
+        {/* </div> */}
 
 
-      </div>
+      {/* </div> */}
 
       <div className="my-10">
         <h2 className="text-xl font-semibold mb-5">Your Prefrences</h2>
-        <div className="flex justify-end my-5">
+        {selectedPreferences.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {selectedPreferences.map((preference, index) => (
+              <span
+                key={index}
+                className="bg-accent text-gray-800 px-3 py-1 rounded-md text-sm"
+              >
+                {preference}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">You haven't selected any preferences yet.</p>
+        )}
+
+        <div className="flex justify-start md:justify-end my-5">
           <Link href="/dashboard/edit-preferences">
           <button className="bg-secondary text-white py-2 px-4 rounded-lg">Edit Prefrences</button></Link>
         </div>
-          {/* TODO - Add preferences management here */}
 
-        <div className="flex justify-end my-2 space-x-0 md:space-x-3 md:space-y-0 space-y-3 flex-col md:flex-row">
+        <div className="flex justify-end my-12 space-x-0 md:space-x-3 md:space-y-0 space-y-3 flex-col md:flex-row">
         <button className="border-secondary bg-white text-secondary py-3 w-full md:w-1/6 text-md md:text-xl rounded-lg border">Cancel</button>
         <button className="bg-secondary text-white py-3 w-full md:w-1/6 text-md md:text-xl rounded-lg">Save</button>
         </div>

@@ -112,8 +112,12 @@ export default function BuinessCampaigns() {
                       }
                     />
                   </td>
-                  <td className="px-4 py-2">{campaign.startDate}</td>
-                  <td className="px-4 py-2">{campaign.endDate === "" ? "Ongoing" : campaign.endDate}</td>
+                  <td className="px-4 py-2">
+                    {campaign.startDate ? new Date(campaign.startDate).toLocaleDateString() : "N/A"}
+                  </td>
+                  <td className="px-4 py-2">
+                    {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "Ongoing"}
+                  </td>
                   <td className="px-4 py-2">{campaign.CR}</td>
                   <td className="px-4 py-2 flex justify-around">
                   <Link href={`/dashboard/edit-campaign?id=${campaign.id}`} passHref>

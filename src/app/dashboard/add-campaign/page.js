@@ -16,6 +16,7 @@ export default function AddCampaign() {
     endDate: "",
     isActive: false,
     ongoing: false,
+    userId: user.uid,
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);

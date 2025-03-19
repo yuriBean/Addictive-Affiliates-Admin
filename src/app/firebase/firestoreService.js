@@ -1,4 +1,3 @@
-"use client";
 import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, addDoc, getDocs, deleteDoc, collectionGroup, query, where, increment, arrayUnion, Timestamp } from "firebase/firestore"; 
 import { app } from './config'; 
 import { format } from "date-fns";

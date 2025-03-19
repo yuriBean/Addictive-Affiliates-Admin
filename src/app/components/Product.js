@@ -64,7 +64,7 @@ export default function ProductPage() {
         
   return (
     <div className="text-black mx-auto max-w-screen">
-      <h1 className="text-3xl font-bold my-4">{product.productName}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold my-4">{product.productName}</h1>
       <div className="flex flex-col space-y-6 justify-center">
         {/* <div className="flex justify-center mb-4">
           <img src={product.images} alt={product.productName} className="w-full h-60 object-cover rounded-lg" />
@@ -108,7 +108,7 @@ export default function ProductPage() {
 
         <div className="my-4">
           <h2 className="text-lg text-secondary">Description</h2>
-          <p className="mt-3">
+          <p className="mt-3 text-sm md:text-lg">
             {product.description}
           </p>
         </div>
@@ -126,15 +126,13 @@ export default function ProductPage() {
             >
               {generatingLink ? "Generating..." : "Generate Link"}
             </button>
-          </div>
-          {affiliateLink && (
             <button
               className="mt-2 bg-accent text-secondary px-4 py-2 rounded"
               onClick={handleCopyLink}
               >
               Copy Link
             </button>
-          )}
+          </div>
         </div>
       </div>
     </div>

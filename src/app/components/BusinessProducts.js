@@ -107,7 +107,7 @@ export default function BusinessProducts() {
                   <td className="px-4 py-2">
                     <FontAwesomeIcon
                       icon={product.isActive ? faToggleOn : faToggleOff}
-                      className={`cursor-pointer text-4xl ${
+                      className={`cursor-pointer text-2xl md:text-4xl ${
                         toggling === product.id ? "opacity-50 cursor-not-allowed" : "text-secondary"
                       }`}
                       onClick={() =>

@@ -1,4 +1,4 @@
-import { updateAffiliateLinkStats, recordConversion } from "@/app/firebase/firestoreService";
+import { recordConversion } from "@/app/firebase/firestoreService";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
