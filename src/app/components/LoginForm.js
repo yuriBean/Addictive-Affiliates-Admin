@@ -30,10 +30,9 @@ const LoginForm = () => {
         e.preventDefault();
 
         try {
-            const user = await login(formData.email, formData.password);
-            console.log("User logged in successfully:", user);
+            const loggedUser = await login(formData.email, formData.password);
+            console.log("User logged in successfully:", loggedUser);
             router.push('/dashboard');
-            
 
         } catch (error) {
             console.error("Error during login:", error);
@@ -44,7 +43,7 @@ const LoginForm = () => {
 
     return (
         <AuthLayout width={'max-w-xl'}>
-            <h1 className="text-3xl font-bold text-center text-primary mb-4">LOGIN</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-4">LOGIN</h1>
             <p className="text-center mb-6 text-sm text-gray-600">Enter your credentials to access your account.</p>
             
             <form onSubmit={handleSubmit} className='text-black'>
@@ -57,7 +56,7 @@ const LoginForm = () => {
                         type="email"
                         name="email"
                         id="email"
-                        className="w-full mt-1 p-2 border border-secondary rounded"
+                        className="w-full mt-1 p-2 text-sm md:text-md border border-secondary rounded"
                         value={formData.email}
                         onChange={handleChange}
                         required
@@ -73,7 +72,7 @@ const LoginForm = () => {
                             type={showPassword ? 'text' : 'password'}
                             name="password"
                             id="password"
-                            className="w-full mt-1 p-2 border border-secondary rounded"
+                            className="w-full mt-1 p-2 text-sm md:text-md border border-secondary rounded"
                             value={formData.password}
                             onChange={handleChange}
                             required
@@ -133,18 +132,18 @@ const LoginForm = () => {
             </div>
 
             <div className="flex flex-col md:flex-row justify-center space-x-0 md:space-x-4 space-y-3 md:space-y-0 mb-4">
-                <div className='border-2 border-secondary px-12 py-2 rounded'>
-                    <button className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white">
+                <div className='border-2 border-secondary px-12 py-2 rounded flex items-center justify-center'>
+                    <button className="w-8 h-8 rounded-full bg-blue-600 text-white">
                         <FontAwesomeIcon icon={faFacebook} />
                     </button>
                 </div>
-                <div className='border-2 border-secondary px-12 py-2 rounded'>
-                    <button className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white">
+                <div className='flex items-center justify-center border-2 border-secondary px-12 py-2 rounded'>
+                    <button className="w-8 h-8 rounded-full bg-indigo-600 text-white">
                         <FontAwesomeIcon icon={faGoogle} />
                     </button>
                 </div>
-                <div className='border-2 border-secondary px-12 py-2 rounded'>
-                    <button className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
+                <div className='flex items-center justify-center border-2 border-secondary px-12 py-2 rounded'>
+                    <button className="w-8 h-8 rounded-full bg-black text-white">
                         <FontAwesomeIcon icon={faApple} />
                     </button>
                 </div>

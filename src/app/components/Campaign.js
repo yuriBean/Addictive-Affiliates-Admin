@@ -3,28 +3,50 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
-import { getCampaign, getProductsByCampaign } from "@/app/firebase/firestoreService";
+import { getCampaign, getCampaignById, getProductsByCampaign, getUser } from "@/app/firebase/firestoreService";
 import { generateAffiliateLink } from "@/app/firebase/firestoreService";
 
 export default function Campaign() {
     const { user } = useAuth();
     const { campaignId: campaignId } = useParams();
-  
+    const [userRole, setUserRole] = useState('');
     const [campaign, setCampaign] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [affiliateLink, setAffiliateLink] = useState(null);
     const [generatingLink, setGeneratingLink] = useState(false);
+
+    useEffect(() => {
+      if (!user) return;
+
+      const fetchUser = async () => {
+        try{
+          setLoading(true);
+          const fetchedUser = await getUser(user.uid);
+          if (fetchedUser.role === "business"){
+            setUserRole("business")
+          } else {
+            setUserRole("affiliate")
+          }
+        } catch (err) {
+          throw err;
+        } finally {
+          setLoading(false);
+        }
+      }
+
+
+      fetchUser();
+    }, [user]);
   
     useEffect(() => {
         if (!user || !campaignId) return;
-      
         const fetchData = async () => {
           try {
             setLoading(true);
             const [campaignData, productList] = await Promise.all([
-              getCampaign(user.uid, campaignId),
+              userRole === "business" ? getCampaign(user.uid, campaignId) : getCampaignById(campaignId),
               getProductsByCampaign(campaignId)
             ]);
             setCampaign(campaignData);
@@ -38,7 +60,7 @@ export default function Campaign() {
         };
       
         fetchData();
-      }, [user, campaignId]);
+      }, [user, campaignId, userRole]);
     
       if (loading) {
         return <p className="text-center text-gray-500">Loading...</p>;
@@ -93,8 +115,8 @@ export default function Campaign() {
                 products.map((product) => (
                   <tr key={product.id} className="border-b text-sm md:text-lg">
                     <td className="px-4 py-2">
-                      <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`}>
-                        {product.productName}
+                    <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`} title={product.productName}>
+                      {product.productName.length > 20 ? product.productName.slice(0, 25) + "..." : product.productName}
                       </Link>
                     </td>
                     <td className="px-4 py-2">

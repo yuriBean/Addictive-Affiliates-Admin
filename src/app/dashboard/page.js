@@ -22,7 +22,7 @@ export default function Dashboard() {
   }, [user]);
 
   if (loading) {
-    return <div className="text-center text-black">Loading dashboard...</div>;
+    return <div className="text-center text-black">Loading...</div>;
   }
 
     return (

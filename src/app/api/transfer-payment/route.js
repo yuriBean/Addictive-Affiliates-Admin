@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { approveTransaction, fetchBalance } from "@/app/firebase/firestoreService";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
@@ -17,14 +18,37 @@ export async function POST(req) {
       return NextResponse.json({ error: "Insufficient balance. Please deposit funds." }, { status: 400 });
     }
 
-    const transfer = await stripe.transfers.create({
-      amount: Math.round(amount * 100), 
+    const transferToPlatform = await stripe.transfers.create(
+      {
+        amount: Math.round(amount * 100), 
+        currency: "usd",
+        destination: process.env.STRIPE_PLATFORM_ACCOUNT, 
+        transfer_group: `payment_${requestId}`, 
+      },
+      {
+        stripeAccount: businessStripeAccountId, 
+      }
+    );
+
+    const charge = await stripe.charges.create({
+      amount: Math.round(amount * 100),
       currency: "usd",
-      destination: affiliateStripeAccountId, 
-      transfer_group: `payment_${requestId}`, 
+      source: businessStripeAccountId, 
+      description: `Payment for request ${requestId}`,
     });
 
-    if (!transfer || transfer.status !== "succeeded") {
+    const transferToAffiliate = await stripe.transfers.create({
+      amount: Math.round(amount * 100),
+      currency: "usd",
+      destination: affiliateStripeAccountId,
+      transfer_group: `payment_${requestId}`,
+      source_transaction: charge.id, 
+    });
+    
+    console.log("Transfer to platform successful:", transferToPlatform);
+    console.log("Transfer to affiliate successful:", transferToAffiliate);
+    
+    if (transferToPlatform.reversed || transferToAffiliate.reversed) {
       return NextResponse.json({ error: "Stripe transfer failed" }, { status: 500 });
     }
 
@@ -35,8 +59,9 @@ export async function POST(req) {
     }
 
     return NextResponse.json({ message: "Transfer approved successfully" }, { status: 200 });
+
   } catch (error) {
-    console.error("Error processing transfer:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Error processing transfer:", error.message, error.stack);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

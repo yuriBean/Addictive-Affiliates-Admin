@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState } from "react";
 import { getAffiliateStats, fetchBalance, getEarningsByDate } from "@/app/firebase/firestoreService";
 import Link from "next/link";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Tooltip, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, Tooltip, XAxis, YAxis, Legend, ResponsiveContainer } from "recharts";
 
 export default function AffiliateDashboard() {
   const {user} = useAuth();
@@ -29,8 +29,6 @@ export default function AffiliateDashboard() {
         setLifetimeEarning(balance.lifetimeEarning);
         setEarningsByDate(data);
         setStats(affiliateStats);
-        console.log("ahd", affiliateStats);
-        console.log("ahdasdasd", data);
       } catch (error) {
         console.error("Error fetching affiliate stats:", error);
       } finally {
@@ -42,16 +40,16 @@ export default function AffiliateDashboard() {
   }, [user]);
 
   if (loading) {
-    return <div className="text-center text-black">Loading dashboard...</div>;
+    return <div className="text-center text-black">Loading...</div>;
   }
 
     return (
       <div className="text-black">
-        <h1 className="text-3xl text-headings font-bold mb-8">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl text-headings font-bold mb-8">Dashboard</h1>
   
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Earnings</h2>
-            <div className=" grid grid-cols-1 md:grid-cols-2 gap-8 flex justify-between items-center mb-3">
+            <div className=" grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 flex justify-between items-center ">
             <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Current Balance</p>
             <p className="text-2xl font-bold">${currentBalance}</p>
@@ -88,7 +86,6 @@ export default function AffiliateDashboard() {
                   
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={earningsByDate}>
-                  {/* <CartesianGrid strokeDasharray="3 3" /> */}
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
@@ -132,8 +129,9 @@ export default function AffiliateDashboard() {
           <div className="my-2 text-right">
               <Link href="/dashboard/campaigns" className="text-secondary font-bold">See More <FontAwesomeIcon icon={faArrowRight} /></Link>
             </div>
-          <div className="bg-white p-6 rounded-lg border border-1 border-gray-300 shadow-lg">
-            <table className="md:min-w-full table-auto">
+          <div className="bg-white p-4     rounded-lg border border-1 border-gray-300 shadow-lg">
+          <div className="overflow-x-auto">
+            <table className="md:min-w-full text-sm md:text-lg table-auto">
               <thead>
                 <tr className="text-left border-b border-1 border-gray-200">
                   <th className="p-5 border-b">Campaign Name</th>
@@ -159,7 +157,7 @@ export default function AffiliateDashboard() {
               ))}
             </tbody>
             </table>
-  
+            </div>
           </div>
         </section>
       </div>

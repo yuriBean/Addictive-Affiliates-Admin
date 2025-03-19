@@ -35,7 +35,7 @@ export default function BusinessDashboardPage() {
   }, [user]);
 
   if (loading) {
-    return <div className="text-center text-black">Loading dashboard...</div>;
+    return <div className="text-center text-black">Loading...</div>;
   }
 
   const campaignPerformanceData = stats?.topCampaigns.map((campaign) => ({

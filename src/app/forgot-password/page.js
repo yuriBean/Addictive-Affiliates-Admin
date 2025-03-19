@@ -26,7 +26,7 @@ const ForgotPasswordPage = () => {
                 <p>Back to Login</p>
         </Link>
             
-        <h1 className="text-3xl font-bold text-primary mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6">
           Forgot Your Password?
         </h1>
         {!emailSent ? (
@@ -44,7 +44,7 @@ const ForgotPasswordPage = () => {
                 name="email"
                 value={email}
                 onChange={handleEmailChange}
-                className="w-full mt-1 p-2 border border-secondary rounded"
+                className="w-full mt-1 p-2 text-sm md:text-md border border-secondary rounded"
                 placeholder="Enter your email"
                 required
               />

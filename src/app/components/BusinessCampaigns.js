@@ -40,7 +40,9 @@ export default function BuinessCampaigns() {
   const indexOfFirstCampaign = indexOfLastCampaign - campaignsPerPage;
   const currentCampaigns = campaigns.slice(indexOfFirstCampaign, indexOfLastCampaign);
 
-  if (loading) return <p>Loading campaigns...</p>;
+  if (loading) {
+    return <div className="text-center text-black">Loading...</div>;
+  }  
   if (error) return <p className="text-red-500">{error}</p>;
 
   const toggleCampaignStatus = async (campaignId, isActive) => {

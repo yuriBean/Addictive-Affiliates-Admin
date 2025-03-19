@@ -48,6 +48,28 @@ export const getUser = async (userId) => {
   return userSnap.data();
 }
 
+export const getAllUsers = async () => {
+  try {
+    const usersRef = collection(db, "users");
+    const usersSnapshot = await getDocs(usersRef);
+
+    if (usersSnapshot.empty) {
+      console.log("No users found.");
+      return [];
+    }
+
+    const users = usersSnapshot.docs.map(doc => ({
+      userId: doc.id,
+      ...doc.data()
+    }));
+
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+};
+
 export const savePaymentDetails = async (userId, paymentData) => {
   try {
       const paymentRef = doc(db, "payments", userId);
@@ -92,6 +114,25 @@ export const getCampaign = async (userId, campaignId) => {
       console.log("Campaign not found.");
       return null;
     }
+  } catch (error) {
+    console.error("Error fetching campaign:", error);
+    throw error;
+  }
+};
+
+export const getCampaignById = async (campaignId) => {
+  try {
+    const users = await getAllUsers();
+    for (const user of users) {
+      const campaigns = await getAllUserCampaigns(user.userId);
+      const matchedCampaign = campaigns.find(campaign => campaign.id === campaignId);
+      if (matchedCampaign) {
+        return matchedCampaign;
+      }
+    }
+
+    console.log("Campaign not found.");
+    return null;
   } catch (error) {
     console.error("Error fetching campaign:", error);
     throw error;
@@ -295,7 +336,8 @@ export const getBusinessByCampaignId = async (campaignId) => {
     if (matchedCampaign) {
       business = { businessId: matchedCampaign.userId, ...matchedCampaign };
     }
-    return business;
+
+    return business.id;
   } catch (error) {
     console.error("Error fetching business:", error);
     return null;
@@ -304,7 +346,7 @@ export const getBusinessByCampaignId = async (campaignId) => {
 
 export const generateAffiliateLink = async (userId, campaignId, productId = null, productUrl = "") => {
   try {
-
+    console.log('test2', userId, campaignId, productId)
     if (productId) {
     const product = await getProduct(productId, campaignId);
       if (product) {
@@ -322,11 +364,12 @@ export const generateAffiliateLink = async (userId, campaignId, productId = null
     });
 
     const finalProductUrl = productUrl ? `${productUrl}?${utmParams.toString()}` : null;
-    const business = await getBusinessByCampaignId(campaignId);
+    const businessCampaignId = await getCampaignById(campaignId);
+    const businessId = businessCampaignId.userId;
 
     const linkData = {
       affiliateId: userId,
-      businessId: business.id,
+      businessId: businessId,
       campaignId,
       productId,
       productUrl: finalProductUrl,
@@ -497,13 +540,14 @@ export const fetchTransactions = async (userId) => {
   }
 };
 
-export const submitWithdrawalRequest = async (transactionId) => {
+export const submitWithdrawalRequest = async (transactionId, userEmail) => {
   try {
     const transactionRef = doc(db, "transactions", transactionId);
 
     await updateDoc(transactionRef, {
       status: "requested",
       requestedAt: new Date(),
+      email: userEmail,
     });
 
     return true;
@@ -552,11 +596,14 @@ export const recordConversion = async (linkId, orderValue, commissionRate) => {
         currentBalance: increment(0)
       });
     }
-
+    
+    const businessCampaignId = await getCampaignById(linkData.campaignId);
+    const businessId = businessCampaignId.userId;
+    
     const transactionRef = collection(db, "transactions");
     await addDoc(transactionRef, {
       affiliateId: linkData.affiliateId,
-      businessId: linkData.affiliateId,
+      businessId: businessId,
       email: linkData.email || '', 
       amount: earnedCommission,
       date: new Date(),
@@ -644,7 +691,7 @@ export const getEarningsByDate = async (userId) => {
 
 export const fetchRequests = async (businessId) => {
   try {
-    const q = query(collection(db, "transactions"), where("businessId", "==", businessId), where("status", "==", "requested"));
+    const q = query(collection(db, "transactions"), where("businessId", "==", businessId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {

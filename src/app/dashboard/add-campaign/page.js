@@ -205,7 +205,7 @@ export default function AddCampaign() {
                 value={formData.endDate}
                 onChange={handleChange}
                 className="w-full p-4 sm:p-6 bg-accent rounded-md"
-                required
+                required = {!formData.ongoing}
               />
             </div>
             </div>

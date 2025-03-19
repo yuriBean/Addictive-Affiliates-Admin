@@ -17,8 +17,12 @@ export async function POST(req) {
       object: "bank_account",
     });
 
+
     if (!bankAccounts.data.length) {
-      return NextResponse.json({ error: "No bank account linked. Please add one in Stripe." }, { status: 400 });
+      return NextResponse.json(
+        { error: "No bank account linked. Please add one in Stripe." },
+        { status: 400 }
+      );
     }
 
     const payout = await stripe.payouts.create(
@@ -32,10 +36,11 @@ export async function POST(req) {
       }
     );
 
-    if (payout.status !== "paid") {
+
+    if (!["pending", "paid"].includes(payout.status)) {
       return NextResponse.json({ error: "Payout failed" }, { status: 500 });
     }
-
+    
     return NextResponse.json({ success: true, payout });
   } catch (error) {
     console.error("Stripe payout error:", error);

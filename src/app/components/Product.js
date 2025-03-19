@@ -45,6 +45,7 @@ export default function ProductPage() {
       const handleGenerateLink = async () => {
         try {
           setGeneratingLink(true);
+          console.log('test1', user.uid, campaignId, productId )
           const linkData = await generateAffiliateLink(user.uid, campaignId, productId);
           setAffiliateLink(linkData);
         } catch (error) {

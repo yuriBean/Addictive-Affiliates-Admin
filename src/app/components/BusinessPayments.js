@@ -205,7 +205,9 @@ export default function BusinessPayments() {
     </thead>
     <tbody>
       {requests.length > 0 ? (
-        requests.map((request) => (
+        requests
+        .filter((request) => selectedTab === "all" || request.status === selectedTab)
+        .map((request) => (
           <tr key={request.id} className="border-b text-sm md:text-lg">
             <td className="px-4 py-2">{new Date(request.date.seconds * 1000).toLocaleDateString()}</td>
             <td className="px-4 py-2">${request.amount.toFixed(2)}</td>

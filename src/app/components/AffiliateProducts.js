@@ -21,8 +21,6 @@ export default function AffiliateProducts() {
       try {
         setLoading(true);
         const productList = await getAllProducts();
-        console.log("Fetched Products:", productList); 
-
         setProducts(productList);
       } catch (err) {
         setError("Failed to fetch products.");
@@ -45,16 +43,18 @@ export default function AffiliateProducts() {
 
   return (
     <div className="text-black mx-auto max-w-screen">
-      <h1 className="text-headings text-3xl font-bold my-4">VIEW ALL PRODUCTS</h1>
+      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">VIEW ALL PRODUCTS</h1>
 
       <div className="flex flex-col space-y-6 justify-center">
         <div className="my-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {currentProducts.map((product) => ( 
               <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`} key={product.id} className="p-4 bg-[#E3E3E3] shadow-lg rounded-lg">
-                <img src={product.images} alt={product.productName} className="w-full h-40 object-cover rounded-lg" />
-                <h3 className="text-lg font-bold mt-3">{product.productName}</h3>
-                <p className="text-gray-600 mt-1">Price: {product.price}</p>
+                <img src={product.images} alt={product.productName} className="w-full h-40 text-sm object-cover rounded-lg" />
+                <h3 className="text-md md:text-lg font-bold mt-3">
+                {product.productName.length > 20 ? product.productName.slice(0, 25) + "..." : product.productName}
+                </h3>
+                <p className="text-gray-600 mt-1 text-sm">Price: {product.price}</p>
                 <small>{product.category}</small>
               </Link>
             ))}

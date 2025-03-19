@@ -58,9 +58,9 @@ export default function AffiliatePayments() {
         const balanceResponse = await axios.post("/api/get-stripe-balance", { accountId });
         const stripeBalance = balanceResponse.data;
     
-        const availableBalance = stripeBalance.available?.find(b => b.currency === "usd")?.amount || 0;
+        const availableBalance = (stripeBalance.available?.find(b => b.currency === "usd")?.amount) / 100 || 0;
         const pendingBalance = (stripeBalance.pending?.find(b => b.currency === "usd")?.amount) / 100 || 0;
-        const instantBalance = stripeBalance.instant_available?.find(b => b.currency === "usd")?.amount || 0;
+        const instantBalance = (stripeBalance.instant_available?.find(b => b.currency === "usd")?.amount) /100 || 0;
     
         setAvailableBalance(availableBalance);
         setPendingBalance(pendingBalance);
@@ -87,7 +87,7 @@ export default function AffiliatePayments() {
       return;
     }
 
-    if (availableBalance < balance.currentBalance * 100) {
+    if (availableBalance < balance.currentBalance) {
       alert(`You have insufficient funds. Some funds may be under processing.`);
       setLoading(false);
       return;
@@ -103,9 +103,10 @@ export default function AffiliatePayments() {
       return;
     }
     try {
+      console.log('req', availableBalance);
       const payoutResponse = await axios.post("/api/create-payout", {
         accountId: accountId,
-        amount: balance.currentBalance,
+        amount: availableBalance,
       });
   
       if (payoutResponse.data.success) {
@@ -162,11 +163,16 @@ export default function AffiliatePayments() {
         return;
     }
 
-    const success = await submitWithdrawalRequest(transaction.id);
+    const success = await submitWithdrawalRequest(transaction.id, user.email);
     setLoading(false);
     
     if (success) {
         alert("Withdrawal request submitted!");
+        setTransactions((prevTransactions) =>
+          prevTransactions.map((t) =>
+            t.id === transaction.id ? { ...t, status: "requested" } : t
+          )
+        );
     }
 };  
 
@@ -177,8 +183,8 @@ export default function AffiliatePayments() {
 
   return (
     <div className="text-black">
-      <h1 className="text-3xl text-headings font-bold mt-4">Payment</h1>
-      <p className="text-xl mb-4">Manage your payment methods and view transaction history.</p>
+      <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Payment</h1>
+      <p className="text-md md:text-xl mb-4">Manage your payment methods and view transaction history.</p>
 
       <section className="mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 flex justify-between items-center mb-3">
@@ -246,7 +252,7 @@ export default function AffiliatePayments() {
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
           <div className="flex justify-end">
-            <button onClick={handleSubmit} disabled={loading} className="bg-secondary text-white py-2 px-6 text-xl rounded-md mt-4">
+            <button onClick={handleSubmit} disabled={loading} className="bg-secondary text-white py-2 px-6 text-md md:text-xl rounded-md mt-4">
               Withdraw
             </button>
           </div>
@@ -255,22 +261,22 @@ export default function AffiliatePayments() {
 
       <div className="my-4 space-y-3">
         <h2 className="text-secondary font-semibold text-xl">Transactions</h2>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-2 md:gap-4">
           {["all", "completed", "pending", "requested", "rejected"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-6 py-2 rounded-full ${selectedTab === tab ? "bg-secondary text-white" : "bg-white border border-secondary hover:bg-secondary hover:text-white text-black"}`}
+              className={`px-6 py-2 rounded-full text-sm md:text-md ${selectedTab === tab ? "bg-secondary text-white" : "bg-white border border-secondary hover:bg-secondary hover:text-white text-black"}`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
         <div className="flex flex-col space-y-6 justify-center">
-        <div className="my-4">
+        <div className="my-4 overflow-x-auto">
         <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
         <thead>
-        <tr className="border-b">
+        <tr className="border-b text-sm md:text-lg">
         <th className="px-4 py-2 text-left bg-accent rounded">Date</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Amount</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Status</th>
@@ -280,7 +286,7 @@ export default function AffiliatePayments() {
     <tbody>
       {filteredTransactions.length > 0 ? (
         filteredTransactions.map((transaction) => (
-          <tr key={transaction.id} className="border-b">
+          <tr key={transaction.id} className="border-b text-sm md:text-lg">
             <td className="px-4 py-2">{new Date(transaction.date.seconds * 1000).toLocaleDateString()}</td>
             <td className="px-4 py-2">${transaction.amount.toFixed(2)}</td>
             <td className={`px-4 py-2 font-semibold ${transaction.status === "pending" ? "text-yellow-500" : transaction.status === "completed" ? "text-green-500" : "text-red-500"}`}>
