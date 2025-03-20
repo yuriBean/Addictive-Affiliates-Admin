@@ -66,9 +66,19 @@ export default function ContactPage() {
   return (
     <div className="flex h-screen overflow-hidden">
         
-    <Sidebar />
+    {user && <Sidebar />}
+    
     <div className="flex-grow p-8 md:p-12 overflow-auto">
     <div className="text-black">
+    {!user && 
+    <>
+      <div className="flex justify-end items-center space-x-5 text-md md:text-lg">
+        <a href="/" className="text-secondary hover:text-black transition-all duration-300">Home</a>
+        <button className="bg-secondary p-4 py-2 text-white rounded-md">
+          <a href="/login">Login</a>
+          </button>
+      </div>
+    </>}
       <h1 className="text-2xl md:text-3xl text-headings font-bold mt-4">Contact Us</h1>
       <p className="text-md md:text-xl mb-4">Here is some information about us.</p>
 
