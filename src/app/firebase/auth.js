@@ -2,7 +2,7 @@
 
 
 import { auth } from "./config";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, reauthenticateWithCredential, EmailAuthProvider, updateEmail, verifyBeforeUpdateEmail, updatePassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, reauthenticateWithCredential, EmailAuthProvider, updateEmail, verifyBeforeUpdateEmail, updatePassword, sendPasswordResetEmail } from "firebase/auth";
 import { createUser, updateFirestoreUserEmail } from "./firestoreService";
 
 export const signUp = async (email, password, additionalData) => {
@@ -85,5 +85,15 @@ export const updateUserPassword = async (user, currentPassword, newPassword) => 
     await updatePassword(user, newPassword);
   } catch (error) {
     throw error;
+  }
+};
+
+export const forgotPassword = async (email) => {
+  try {
+    console.log("Sending password reset email to:", email);
+    await sendPasswordResetEmail(auth, email);
+    return "Password reset email sent. Please check your inbox.";
+  } catch (error) {
+    throw new Error(error.message || "Failed to send password reset email.");
   }
 };

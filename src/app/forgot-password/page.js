@@ -4,18 +4,30 @@ import AuthLayout from "../components/AuthLayout";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { forgotPassword } from "../firebase/auth";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+  const handleChange = (event) => {
+    setEmail(event.target.value);
   };
-
-  const handleSubmit = (e) => {
+  
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    setEmailSent(true);
+    setLoading(true)
+    try {
+      await forgotPassword(email);
+      setError("Password reset link sent. Check your email.");
+      setEmailSent(true);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
     console.log("Password reset link sent to:", email); 
   };
 
@@ -43,7 +55,7 @@ const ForgotPasswordPage = () => {
                 id="email"
                 name="email"
                 value={email}
-                onChange={handleEmailChange}
+                onChange={handleChange}
                 className="w-full mt-1 p-2 text-sm md:text-md border border-secondary rounded"
                 placeholder="Enter your email"
                 required
@@ -53,8 +65,10 @@ const ForgotPasswordPage = () => {
               type="submit"
               className="w-full py-2 bg-secondary text-white rounded hover:bg-purple-800"
             >
-              Send Reset Link
+              {loading ? "Sending..." : "Send Reset Link"}
             </button>
+          {error && <p className="text-red-500">{error}</p>}
+
           </form>
         ) : (
           <div className="text-center">
