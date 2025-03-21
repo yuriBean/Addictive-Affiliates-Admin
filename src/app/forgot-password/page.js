@@ -5,12 +5,14 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { forgotPassword } from "../firebase/auth";
+import { useRouter } from "next/navigation";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleChange = (event) => {
     setEmail(event.target.value);
@@ -33,7 +35,7 @@ const ForgotPasswordPage = () => {
 
   return (
     <AuthLayout width={'max-w-xl'}>
-        <Link href="/login" className="text-black mb-5 flex space-x-3 items-center">
+        <Link href="/login" className="text-black mb-5 flex space-x-3 text-sm md:text-lg items-center">
                 <FontAwesomeIcon icon={faArrowLeft} />
                 <p>Back to Login</p>
         </Link>
@@ -77,7 +79,7 @@ const ForgotPasswordPage = () => {
             </p>
             <button
               onClick={() => router.push("/login")}
-              className="w-full py-2 bg-primary text-white rounded hover:bg-purple-800"
+              className="w-full py-2 bg-primary text-white text-sm md:text-lg rounded hover:bg-purple-800"
             >
               Back to Login
             </button>
