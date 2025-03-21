@@ -96,6 +96,8 @@ export default function BuinessCampaigns() {
               </tr>
             </thead>
             <tbody>
+            {currentCampaigns.length > 0 ? (
+              <>
               {currentCampaigns.map((campaign) => (
                 <tr key={campaign.id} className="border-b text-sm md:text-lg">
                   <td className="px-4 py-2">
@@ -112,6 +114,7 @@ export default function BuinessCampaigns() {
                       onClick={() =>
                         toggling === null && toggleCampaignStatus(campaign.id, campaign.isActive)
                       }
+                      
                     />
                   </td>
                   <td className="px-4 py-2">
@@ -129,6 +132,12 @@ export default function BuinessCampaigns() {
                   </td>
                 </tr>
               ))}
+              </>
+            ) : (
+              <tr>
+                  <td colSpan="6" className="text-center py-4 text-gray-500">No campaigns to show</td>
+                </tr>            
+              )}
             </tbody>
           </table>
           <div className="flex justify-center mt-4 space-x-2">

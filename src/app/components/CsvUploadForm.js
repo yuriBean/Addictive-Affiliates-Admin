@@ -102,12 +102,12 @@ export default function CsvUploadForm() {
       <select
         value={selectedCampaign}
         onChange={handleCampaignChange}
-        className="w-full p-2 md:p-4 bg-white border border-gray-400 rounded-md"
+        className="w-full p-2 md:p-4 bg-white border text-md border-gray-400 rounded-md"
         required
       >
-        <option value="">Select a Campaign</option>
+        <option className="text-sm" value="">Select a Campaign</option>
         {campaigns.map((campaign) => (
-          <option key={campaign.id} value={campaign.id}>
+          <option className="text-sm" key={campaign.id} value={campaign.id}>
             {campaign.campaignName}
           </option>
         ))}

@@ -233,7 +233,7 @@ export default function BusinessPayments() {
             ))
           ) : (
             <tr>
-              <td colSpan="3" className="text-center py-4 text-md md:text-lg text-gray-500">No pending requests</td>
+              <td colSpan="6" className="text-center py-4 text-md md:text-lg text-gray-500">No pending requests</td>
             </tr>
           )}
     </tbody>

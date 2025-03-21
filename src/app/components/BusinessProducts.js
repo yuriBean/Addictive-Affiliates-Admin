@@ -97,6 +97,8 @@ export default function BusinessProducts() {
               </tr>
             </thead>
             <tbody>
+            {currentProducts.length > 0 ? (
+              <>
               {currentProducts.map((product) => (  
                 <tr key={product.id} className="border-b text-sm md:text-lg">
                   <td className="px-4 py-2">
@@ -125,6 +127,12 @@ export default function BusinessProducts() {
                   </td>
                 </tr>
               ))}
+            </>
+            ) : (
+                <tr>
+                  <td colSpan="5" className="text-center py-4 text-gray-500">No products to show</td>
+                </tr>
+            )}
             </tbody>
           </table>
           </div>
