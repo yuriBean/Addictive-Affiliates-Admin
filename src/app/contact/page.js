@@ -83,16 +83,11 @@ export default function ContactPage() {
       <p className="text-md md:text-xl mb-4">Here is some information about us.</p>
 
       <div className="space-y-2 my-5">
-        <h2 className="text-lg md:text-xl font-semibold">Our Address</h2>
-        <p className="text-md md:text-xl mb-4">This will be our address</p>
-      </div>
-
-      <div className="space-y-2 my-5">
         <h2 className="text-lg md:text-xl font-semibold">Our Phone No.</h2>
-        <p className="text-md md:text-xl mb-4">0245 23732231</p>
+        <p className="text-md md:text-xl mb-4">+1 7325038255</p>
       </div>
 
-      <p className="text-md md:text-xl my-4">Or you can email us your queries.</p>
+      <p className="text-md md:text-xl my-4">Or you can email us your queries: admin@addictiveaffiliates.com</p>
 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4 text-sm md:text-lg">
