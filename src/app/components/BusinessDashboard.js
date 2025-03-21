@@ -56,12 +56,12 @@ export default function BusinessDashboardPage() {
   
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Statistics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 flex justify-between items-center ">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 flex justify-between items-center ">
             <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Total Revenue</p>
             <p className="text-2xl font-bold">${stats?.totalRevenue.toFixed(2) || "0.00"}</p>
               </div>
-              <div className="mb-6 space-y-2 col-span-1 bg-accent  p-6 rounded-lg">
+              <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
               <p className="text-sm">Active Campaigns</p>
                 <p className="text-2xl font-bold">{campaigns.length}</p>
               </div>
@@ -91,10 +91,11 @@ export default function BusinessDashboardPage() {
           </div>
         </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
               <div className="mb-6 col-span-1">
                 <h3 className="text-lg font-normal">Campaign Performance</h3>
-                <div className="h-70 border border-1 border-gray-400 rounded-lg mt-2">
+                <div className="h-60 bg-white border border-gray-400 rounded-lg mt-2 p-4 flex items-center justify-center">
+                {campaignPerformanceData?.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={campaignPerformanceData}>
                     <XAxis dataKey="name" />
@@ -105,12 +106,16 @@ export default function BusinessDashboardPage() {
                     <Line type="monotone" dataKey="clicks" stroke="#82ca9d" />
                   </LineChart>
                 </ResponsiveContainer>
+                ) : (
+                  <p className="text-gray-500">No data available</p>
+                )}
                 </div>
               </div>
 
               <div className="mb-6 col-span-1">
                 <h3 className="text-lg font-normal">Product Performance</h3>
-                <div className="h-70 border border-1 border-gray-400 rounded-lg mt-2">
+                <div className="h-60 bg-white border border-gray-400 rounded-lg mt-2 p-4 flex items-center justify-center">
+                {productPerformanceData?.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={productPerformanceData}>
                     <XAxis dataKey="name" />
@@ -120,6 +125,9 @@ export default function BusinessDashboardPage() {
                     <Bar dataKey="conversions" fill="#82ca9d" />
                   </BarChart>
                 </ResponsiveContainer>
+                 ) : (
+                  <p className="text-gray-500">No data available</p>
+                )}
                 </div>
               </div>
             </div>

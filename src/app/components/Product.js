@@ -117,22 +117,24 @@ export default function ProductPage() {
         <div className="my-6">
           <h2 className="text-lg text-secondary">Affiliate Link</h2>
           <div className="flex space-x-0 space-y-2 md:space-x-6 justify-between md:flex-row flex-col">
-            <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 w-full">
               {affiliateLink ? affiliateLink.link : "Generate a link to start tracking"}
             </p>
+          <div className="flex text-sm md:text-lg md:flex-row justify-start md:justify-end items-center w-full gap-4">
             <button 
-              className="bg-secondary w-full md:w-1/6 py-2 text-white rounded"
-              onClick={handleGenerateLink}
+            className="bg-secondary p-4 py-2 text-white rounded"
+            onClick={handleGenerateLink}
               disabled={generatingLink}
             >
               {generatingLink ? "Generating..." : "Generate Link"}
             </button>
             <button
-              className="mt-2 bg-accent text-secondary px-4 py-2 rounded"
-              onClick={handleCopyLink}
+            className=" bg-accent text-secondary p-4 py-2 rounded"
+            onClick={handleCopyLink}
               >
               Copy Link
             </button>
+          </div>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import AuthLayout from "./AuthLayout";
 import { useAuth } from "../context/AuthContext";
 import { saveStripeAccount, getStripeAccount } from "../firebase/firestoreService";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const MIN_DEPOSIT = 10; 
 
@@ -16,6 +17,7 @@ const BusinessPaymentSetup = () => {
     const { user } = useAuth();
     const [stripeAccountId, setStripeAccountId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -117,6 +119,9 @@ const BusinessPaymentSetup = () => {
         return <p>Loading...</p>;
     }
 
+    const handleSkip = () => {
+        router.push('/dashboard');
+    }
     return (
         <AuthLayout width={"max-w-lg"}>
             <h1 className="text-2xl md:text-3xl font-bold text-primary mb-4">DEPOSIT FUNDS</h1>
@@ -174,6 +179,14 @@ const BusinessPaymentSetup = () => {
                     Proceed to Payment
                 </button>
             </form>
+            <div className='flex justify-end'>
+                <button
+                    className="px-4 py-2 text-secondary text-md rounded-md"
+                    onClick={() => handleSkip()}
+                >
+                    Do it later
+                </button>
+                </div>
         </AuthLayout>
     );
 };

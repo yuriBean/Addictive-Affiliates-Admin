@@ -26,6 +26,14 @@ export default function AddProductForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
+  const categories = [
+    "Travel", "Technology", "Health", "Fashion",
+    "Music", "Art", "Gaming", "Cooking",
+    "Sports", "Finance", "Education", "Nature",
+    "Photography", "Fitness", "Food", "Movies",
+    "Books", "History", "Science", "Lifestyle",
+    "Other",
+  ];
 
   useEffect(() => {
     if (!user) return;
@@ -35,6 +43,9 @@ export default function AddProductForm() {
         setLoading(true);
         const campaignList = await getAllUserCampaigns(user.uid);
         setCampaigns(campaignList);
+        if (!campaignList.length > 0){
+          setErrorMessage("Create a campaign before adding products.");
+        }
       } catch (err) {
         setErrorMessage("Failed to fetch campaigns.");
         console.error(err);
@@ -93,6 +104,11 @@ export default function AddProductForm() {
       return;
     }
 
+    if (formData.assignedCampaign === "") {
+      setErrorMessage("You must select a campaign for a product.");
+      return;
+    }
+
     setLoading(true);
     setErrorMessage("");
 
@@ -126,6 +142,7 @@ export default function AddProductForm() {
 
   return (
     <div className="text-black">
+      {!campaigns.length > 0 && <p className="text-red-500 text-sm my-4">Create a campaign before adding products.</p>} 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4 text-sm md:text-md">
           <input
@@ -146,9 +163,9 @@ export default function AddProductForm() {
             required
           >
             <option value="">Select Category</option>
-            <option>category 1</option>
-            <option>category 2</option>
-            <option>category 3</option>
+            {categories.map((category) => (
+            <option key={category} value={category}>{category}</option>
+            ))}
           </select>
 
           <select

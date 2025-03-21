@@ -69,7 +69,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
 
     return (
         <AuthLayout width={'max-w-2xl'}>
-            <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-4">SIGN UP</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-4">SIGN UP AS AN AFFILIATE</h1>
             <p className="text-center mb-6 text-sm text-gray-600">Let’s get you all set up so you can access your account.</p>
             
             <form onSubmit={handleSubmit} className='text-black'>

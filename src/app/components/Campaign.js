@@ -95,9 +95,9 @@ export default function Campaign() {
       <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">{campaign.campaignName}</h1>
       <div className="flex flex-col space-y-6 justify-center">
       
-      <div className="flex items-center justify-center mb-4">
+      {/* <div className="flex items-center justify-center mb-4">
           <img src={campaign.image} alt={campaign.campaignName} className="w-full h-60 object-cover rounded-lg" />
-        </div>        
+        </div>         */}
         <h2 className="text-lg text-secondary">Products</h2>
 
         <div className="my-4 overflow-x-auto">
@@ -147,7 +147,7 @@ export default function Campaign() {
         <div className="my-4">
           <h2 className="text-lg text-secondary">Campaign Duration</h2>
           <p className="mt-3 font-semibold space-x-4">
-            <span className="text-gray-500 md:text-md text-sm">{campaign.startDate ?? "N/A"}</span> <span>to</span> <span className="text-gray-500 md:text-md text-sm">{campaign.endDate ?? "N/A"}</span>
+            <span className="text-gray-500 md:text-md text-sm">{campaign.startDate ?? "N/A"}</span> <span>to</span> <span className="text-gray-500 md:text-md text-sm">{campaign.endDate ? (<>{campaign.endDate}</>) : "Ongoing"}</span>
           </p>
         </div>
 
@@ -159,22 +159,24 @@ export default function Campaign() {
         <div className="my-6">
           <h2 className="text-lg text-secondary">Affiliate Link</h2>
           <div className="flex space-x-0 space-y-2 md:space-x-6 justify-between md:flex-row flex-col">
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 w-full">
             {affiliateLink ? affiliateLink.link : "Generate a link to start tracking"}
           </p>
+          <div className="flex text-sm md:text-lg md:flex-row justify-start md:justify-end items-center w-full gap-4">
           <button 
-            className="bg-secondary w-full md:w-1/6 py-2 text-white rounded"
+            className="bg-secondary p-4 py-2 text-white rounded"
             onClick={handleGenerateLink}
             disabled={generatingLink}
           >
             {generatingLink ? "Generating..." : "Generate Link"}
           </button>
           <button
-            className="mt-2 bg-accent text-secondary px-4 py-2 rounded"
+            className=" bg-accent text-secondary p-4 py-2 rounded"
             onClick={handleCopyLink}
           >
             Copy Link
           </button>
+          </div>
           </div>
         </div>
 

@@ -71,7 +71,7 @@ export default function AddCampaign() {
       });
   
       if (!onboardingCompleted.data.success) {
-          alert("Please complete your Stripe onboarding before proceeding.");
+          setErrorMessage("Please complete your Stripe onboarding before proceeding.");
           setLoading(false);
           return;
       } 

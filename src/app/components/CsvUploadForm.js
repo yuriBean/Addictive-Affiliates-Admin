@@ -96,6 +96,7 @@ export default function CsvUploadForm() {
 
   return (
     <div className="border border-gray-400 p-6 text-sm md:text-lg rounded-md bg-gray-100">
+      {!campaigns.length > 0 && <p className="text-red-500 text-sm my-4">Create a campaign before adding products.</p>} 
 
       <label className="block mb-2 text-sm md:text-lg font-medium">Select Campaign:</label>
       <select
