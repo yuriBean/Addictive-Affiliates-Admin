@@ -9,9 +9,13 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    await recordConversion(linkId, orderValue, commissionRate);
+    const conversionId = await recordConversion(linkId, orderValue, commissionRate);
 
-    return NextResponse.json({ message: "Conversion recorded successfully" }, { status: 200 });
+    return NextResponse.json({
+      success: true,
+      message: "Conversion recorded successfully",
+      conversionId: conversionId, 
+    }, { status: 200 });
   } catch (error) {
     console.error("Error tracking conversion:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

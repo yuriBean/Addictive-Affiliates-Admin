@@ -574,12 +574,6 @@ export const recordConversion = async (linkId, orderValue, commissionRate) => {
     }
 
     const linkData = linkSnap.data();
-    // const productId = linkData.productId;
-    // const campaignId = linkData.campaignId;
-    // const product = await getProduct(productId, campaignId);
-    // const campaign = await getCampaign(product.userId, campaignId);
-    // orderValue = product.price;
-    // commissionRate = campaign.commissionRate;
     const earnedCommission = orderValue * commissionRate;
 
     await updateDoc(linkRef, {
@@ -608,7 +602,7 @@ export const recordConversion = async (linkId, orderValue, commissionRate) => {
     const businessId = businessCampaignId.userId;
     
     const transactionRef = collection(db, "transactions");
-    await addDoc(transactionRef, {
+    const transactionDoc = await addDoc(transactionRef, {
       affiliateId: linkData.affiliateId,
       businessId: businessId,
       email: linkData.email || '', 
@@ -619,6 +613,7 @@ export const recordConversion = async (linkId, orderValue, commissionRate) => {
       status: "pending",
     });
 
+    return transactionDoc.id;
   } catch (error) {
     console.error("Error recording conversion:", error);
     throw error;
