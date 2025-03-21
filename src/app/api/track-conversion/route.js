@@ -3,13 +3,13 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { linkId, orderValue, commissionRate } = await req.json();
+    const { campaignId, affiliateId, orderValue, commissionRate } = await req.json();
 
-    if (!linkId || !orderValue || !commissionRate) {
+    if (!campaignId || !affiliateId || !orderValue || !commissionRate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const conversionId = await recordConversion(linkId, orderValue, commissionRate);
+    const conversionId = await recordConversion(campaignId, affiliateId, orderValue, commissionRate);
 
     return NextResponse.json({
       success: true,

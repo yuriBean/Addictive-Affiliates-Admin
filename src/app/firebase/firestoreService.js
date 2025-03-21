@@ -564,31 +564,38 @@ export const submitWithdrawalRequest = async (transactionId, userEmail) => {
   }
 };
 
-export const recordConversion = async (linkId, orderValue, commissionRate) => {
+export const recordConversion = async (campaignId, affiliateId, orderValue, commissionRate) => {
   try {
-    const linkRef = doc(db, "affiliateLinks", linkId);
-    const linkSnap = await getDoc(linkRef);
+    const linkQuery = query(
+      collection(db, "affiliateLinks"),
+      where("campaignId", "==", campaignId),
+      where("affiliateId", "==", affiliateId)
+    );
+
+    const linkSnap = await getDoc(linkQuery);
 
     if (!linkSnap.exists()) {
       throw new Error("Affiliate link not found");
     }
 
-    const linkData = linkSnap.data();
+    const linkDoc = linkSnap.docs[0];
+    const linkId = linkDoc.id;
+    const linkData = linkDoc.data();
+
     const earnedCommission = orderValue * commissionRate;
 
-    await updateDoc(linkRef, {
+    await updateDoc(doc(db, "affiliateLinks", linkId), {
       conversions: increment(1),
       revenue: increment(orderValue),
       conversionDates: arrayUnion(new Date()),
     });
 
-    const accountRef = doc(db, "accounts", linkData.affiliateId);
-
+    const accountRef = doc(db, "accounts", affiliateId);
     const accountSnap = await getDoc(accountRef);
 
     if (!accountSnap.exists()) {
       await setDoc(accountRef, {
-        userId: linkData.affiliateId,
+        userId: affiliateId,
         currentBalance: 0,
         lifetimeEarnings: 0,
       });
@@ -603,7 +610,7 @@ export const recordConversion = async (linkId, orderValue, commissionRate) => {
     
     const transactionRef = collection(db, "transactions");
     const transactionDoc = await addDoc(transactionRef, {
-      affiliateId: linkData.affiliateId,
+      affiliateId,
       businessId: businessId,
       email: linkData.email || '', 
       amount: earnedCommission,
