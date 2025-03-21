@@ -27,7 +27,11 @@ export const logIn = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user; 
   } catch (error) {
-    throw error;
+    if (error.code === "auth/invalid-credential") {
+      throw new Error("Invalid credentials. Sign up or recheck your password.");
+    }
+
+    throw new Error(error.message);
   }
 };
 
