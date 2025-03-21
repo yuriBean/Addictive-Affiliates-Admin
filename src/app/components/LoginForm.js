@@ -17,6 +17,8 @@ const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const { login } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -28,6 +30,7 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             const loggedUser = await login(formData.email, formData.password);
@@ -36,7 +39,9 @@ const LoginForm = () => {
 
         } catch (error) {
             console.error("Error during login:", error);
-            alert("Error during login, please try again.");
+            setError(error.message || "Error during login, please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -115,9 +120,11 @@ const LoginForm = () => {
                     type="submit"
                     className="w-full py-2 mt-4 bg-secondary text-white rounded hover:bg-purple-800"
                 >
-                    Login
+                    
+                    {loading ? 'Logging in...' : 'Login'}
                 </button>
             </form>
+            {error && <p className='text-red-500'>{error}</p>}
 
             <div className="mt-4 text-center">
                 <p className="text-sm text-black ">
