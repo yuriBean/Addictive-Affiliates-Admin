@@ -52,7 +52,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
                 firstName:formData.firstName,
                 lastName:formData.lastName,
                 phone:formData.phone,
-                role: 'advertiser',
+                role: 'affiliate',
             }
             const user = await signUp(formData.email, formData.password, additionalData);
             console.log("User created successfully!", user);

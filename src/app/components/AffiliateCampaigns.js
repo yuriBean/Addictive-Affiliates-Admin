@@ -13,8 +13,9 @@ export default function AffiliateCampaigns() {
     const loadCampaigns = async () => {
       try{
         const data = await getAllCampaigns();
-        setCampaigns(data);
-      } catch (error) {
+        const activeCampaigns = data.filter((campaign) => campaign.isActive);
+        setCampaigns(activeCampaigns);
+        } catch (error) {
         throw error;
       } finally {
         setLoading(false);
