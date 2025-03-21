@@ -3,7 +3,14 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { campaignId, affiliateId, orderValue, commissionRate } = await req.json();
+
+    //temp for Shmuel
+    // const { campaignId, affiliateId, orderValue, commissionRate } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const orderValue = parseFloat(searchParams.get("orderValue"));
+    const commissionRate = parseFloat(searchParams.get("commissionRate"));
+    const affiliateId = searchParams.get("affiliateId");
+    const campaignId = searchParams.get("campaignId");
 
     if (!campaignId || !affiliateId || !orderValue || !commissionRate) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

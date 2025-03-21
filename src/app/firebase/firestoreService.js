@@ -572,9 +572,9 @@ export const recordConversion = async (campaignId, affiliateId, orderValue, comm
       where("affiliateId", "==", affiliateId)
     );
 
-    const linkSnap = await getDoc(linkQuery);
+    const linkSnap = await getDocs(linkQuery);
 
-    if (!linkSnap.exists()) {
+    if (linkSnap.empty) {
       throw new Error("Affiliate link not found");
     }
 
