@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const Footer = () => {
   return (
-    <footer className="bg-accent text-[#05182AE5] py-16 px-6 sm:px-12">
+    <footer className="bg-accent text-[#05182AE5] py-16 px-6 sm:px-12 overflow-hidden">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-16">
         <div className="text-center md:text-left">
           <h2 className="text-3xl mb-4">Unlock the path to success with affiliate marketing.</h2>
@@ -31,13 +31,15 @@ const Footer = () => {
         <div className="text-center md:text-left">
         <div className='w-full h-1 bg-black mb-10'></div>
 
+        <div className='flex flex-col mx-auto'>
           <div className="flex space-x-4 items-center justify-center sm:justify-start mb-4">
             <FontAwesomeIcon icon={faPhoneVolume} size="2x" className="text-secondary" />
-            <p className="text-md md:text-lg">+1 7325038255</p>
+            <p className="text-md">+1 7325038255</p>
           </div>
-          <div className="flex space-x-4 items-center justify-center sm:justify-start">
+          <div className="flex space-x-4 items-center justify-center sm:justify-start mb-4">
             <FontAwesomeIcon icon={faEnvelope} size="2x" className="text-secondary" />
-            <p className="text-md md:text-lg">admin@addictiveaffiliates.com</p>
+            <p className="text-md break-all overflow-hidden">admin@addictiveaffiliates.com</p>
+          </div>
           </div>
         </div>
       </div>

@@ -52,11 +52,11 @@ export default function AffiliateDashboard() {
             <div className=" grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 flex justify-between items-center ">
             <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Current Balance</p>
-            <p className="text-2xl font-bold">${currentBalance}</p>
+            <p className="text-2xl font-bold">${currentBalance || 0}</p>
               </div>
               <div className="mb-6 space-y-2 col-span-1 bg-accent  p-6 rounded-lg">
               <p className="text-sm">Lifetime Earnings</p>
-              <p className="text-2xl font-bold">${lifetimeEarnings}</p>
+              <p className="text-2xl font-bold">${lifetimeEarnings || 0}</p>
               </div>
             </div>
 
@@ -146,6 +146,8 @@ export default function AffiliateDashboard() {
                 </tr>
               </thead>
               <tbody className="text-gray-500">
+            {stats?.topCampaigns.length > 0 ? (
+              <>
               {stats?.topCampaigns.map((campaign) => (
                 <tr key={campaign.id}>
                   <td className="p-5 border-b text-black">{campaign.campaignName}</td>
@@ -159,6 +161,11 @@ export default function AffiliateDashboard() {
                   <td className="p-5 border-b">{campaign.conversionRate}%</td>
                 </tr>
               ))}
+              </>) : (
+                <tr>
+                <td colSpan="5" className="text-center py-4 text-gray-500">No campaigns to show</td>
+              </tr>               
+              )}
             </tbody>
             </table>
             </div>
