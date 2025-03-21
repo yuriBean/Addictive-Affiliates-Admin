@@ -13,6 +13,9 @@ export async function POST(req) {
 
     const amountInCents = Math.round(amount * 100);
 
+    const balance = await stripe.balance.retrieve({ stripeAccount: accountId });
+    console.log('balance', balance);
+
     const bankAccounts = await stripe.accounts.listExternalAccounts(accountId, {
       object: "bank_account",
     });
@@ -29,7 +32,7 @@ export async function POST(req) {
       {
         amount: amountInCents,
         currency: "usd",
-        method: "standard", 
+        method: "instant", 
       },
       {
         stripeAccount: accountId, 

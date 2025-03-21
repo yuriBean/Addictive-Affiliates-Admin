@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUserPreferences, saveUserPreferences } from "../firebase/firestoreService";
 
-const Preferences = ({ onNext }) => {
+const Preferences = ({ onNext, onEdit }) => {
   const [selectedPreferences, setSelectedPreferences] = useState([]);
   const { user } = useAuth();
   const [loading, setLoading] =useState(true);
@@ -50,6 +50,7 @@ const Preferences = ({ onNext }) => {
       const success = await saveUserPreferences(user.uid, selectedPreferences);
       if (success){
         onNext && onNext();
+        onEdit && onEdit();
       }
     } catch (error) {
       console.error("Failed to save preferences:", error);

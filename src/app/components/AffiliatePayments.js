@@ -14,7 +14,6 @@ export default function AffiliatePayments() {
   const [selectedTab, setSelectedTab] = useState("all");
   const [stripeAccountId, setStripeAccountId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [availableBalance, setAvailableBalance] = useState(0);
   const [pendingBalance, setPendingBalance] = useState(0);
   const [instantBalance, setInstantBalance] = useState(0);
   const [accountId, setAccountId] = useState("");
@@ -58,11 +57,9 @@ export default function AffiliatePayments() {
         const balanceResponse = await axios.post("/api/get-stripe-balance", { accountId });
         const stripeBalance = balanceResponse.data;
     
-        const availableBalance = (stripeBalance.available?.find(b => b.currency === "usd")?.amount) / 100 || 0;
         const pendingBalance = (stripeBalance.pending?.find(b => b.currency === "usd")?.amount) / 100 || 0;
         const instantBalance = (stripeBalance.instant_available?.find(b => b.currency === "usd")?.amount) /100 || 0;
     
-        setAvailableBalance(availableBalance);
         setPendingBalance(pendingBalance);
         setInstantBalance(instantBalance);    
       } catch (error) {
@@ -87,7 +84,7 @@ export default function AffiliatePayments() {
       return;
     }
 
-    if (availableBalance < balance.currentBalance) {
+    if (instantBalance > balance.currentBalance) {
       alert(`You have insufficient funds. Some funds may be under processing.`);
       setLoading(false);
       return;
@@ -105,12 +102,12 @@ export default function AffiliatePayments() {
     try {
       const payoutResponse = await axios.post("/api/create-payout", {
         accountId: accountId,
-        amount: availableBalance,
+        amount: instantBalance,
       });
   
       if (payoutResponse.data.success) {
-        alert("Withdrawal initiated! Funds will arrive in 2-5 business days.");
-        await withdrawFunds(user.uid, availableBalance);
+        alert("Funds have been transferred.");
+        await withdrawFunds(user.uid, instantBalance);
       } else {
         alert("Payout failed: " + payoutResponse.data.error);
       }
@@ -195,9 +192,8 @@ export default function AffiliatePayments() {
         </div>
         <div className="flex flex-col space-y-1 text-gray-500">
               <p className="text-medium text-sm text-gray-600 my-3">Funds under processing can be withdrawn within 2-7 days. If you are experiencing issues withdrawing funds, contact support.</p>
-              <small>Available Balance: ${availableBalance}</small>
               <small>Pending Balance: ${pendingBalance}</small>
-              <small>Instantly Available Balance: ${instantBalance}</small>
+              <small>Available Balance: ${instantBalance}</small>
         </div>
       </section>
 
