@@ -596,7 +596,7 @@ export const recordConversion = async (linkId, orderValue, commissionRate) => {
       await setDoc(accountRef, {
         userId: linkData.affiliateId,
         currentBalance: 0,
-        lifetimeEarning: 0,
+        lifetimeEarnings: 0,
       });
     } else {
       await updateDoc(accountRef, {

@@ -13,7 +13,7 @@ export default function AffiliateDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentBalance, setCurrentBalance] = useState(0.00);
-  const [lifetimeEarning, setLifetimeEarning] = useState(0.00);
+  const [lifetimeEarnings, setLifetimeEarnings] = useState(0.00);
   const [earningsByDate, setEarningsByDate] = useState([]);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function AffiliateDashboard() {
         const balance = await fetchBalance(user.uid);
         const data = await getEarningsByDate(user.uid);
         setCurrentBalance(balance.currentBalance);
-        setLifetimeEarning(balance.lifetimeEarning);
+        setLifetimeEarnings(balance.lifetimeEarnings);
         setEarningsByDate(data);
         setStats(affiliateStats);
       } catch (error) {
@@ -56,7 +56,7 @@ export default function AffiliateDashboard() {
               </div>
               <div className="mb-6 space-y-2 col-span-1 bg-accent  p-6 rounded-lg">
               <p className="text-sm">Lifetime Earnings</p>
-              <p className="text-2xl font-bold">${lifetimeEarning}</p>
+              <p className="text-2xl font-bold">${lifetimeEarnings}</p>
               </div>
             </div>
 
@@ -82,7 +82,8 @@ export default function AffiliateDashboard() {
               </div>
               <div className="mb-6 col-span-1">
                 <h3 className="text-lg font-normal">Earnings by Date</h3>
-                <div className="h-60 bg-white border border-gray-400 rounded-lg mt-2 p-4">
+                <div className="h-60 bg-white border border-gray-400 rounded-lg mt-2 p-4 flex items-center justify-center">
+                {earningsByDate?.length > 0 ? (
                   
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={earningsByDate}>
@@ -93,6 +94,9 @@ export default function AffiliateDashboard() {
                   <Bar dataKey="revenue" fill="#82ca9d" />
                 </BarChart>
               </ResponsiveContainer>
+              ) : (
+                <p className="text-gray-500">No campaign earnings available</p>
+              )}
               </div> 
               
               </div>

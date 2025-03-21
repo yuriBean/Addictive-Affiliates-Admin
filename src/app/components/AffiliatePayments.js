@@ -7,10 +7,11 @@ import axios from "axios";
 export default function AffiliatePayments() {
   const { user } = useAuth();
 
-  const [formData, setFormData] = useState({ paymentMethod: "", email: "", confirmEmail: "" });
   const [balance, setBalance] = useState();
   const [transactions, setTransactions] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [fundSuccessMessage, setFundSuccessMessage] = useState("");
   const [selectedTab, setSelectedTab] = useState("all");
   const [stripeAccountId, setStripeAccountId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -70,22 +71,23 @@ export default function AffiliatePayments() {
     getStripeBalance();
   }, [accountId])
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
   const handleSubmit = async () => {
     setLoading(true);
     
     if (!accountId) {
-      alert("You need to create and complete Stripe onboarding first.");
+      setErrorMessage("You need to create and complete Stripe onboarding first.");
       setLoading(false);
       return;
     }
 
-    if (instantBalance > balance.currentBalance) {
-      alert(`You have insufficient funds. Some funds may be under processing.`);
+    if (instantBalance === 0) {
+      setErrorMessage(`You have no funds to withdraw.`);
+      setLoading(false);
+      return;
+    }
+
+    if (instantBalance < balance.currentBalance) {
+      setErrorMessage(`You have insufficient funds. Some funds may be under processing.`);
       setLoading(false);
       return;
     }
@@ -95,7 +97,7 @@ export default function AffiliatePayments() {
     });
   
     if (!onboardingCompleted.data.success) {
-      alert("Please complete your Stripe onboarding before withdrawing funds.");
+      setErrorMessage("Please complete your Stripe onboarding before withdrawing funds.");
       setLoading(false);
       return;
     }
@@ -106,14 +108,14 @@ export default function AffiliatePayments() {
       });
   
       if (payoutResponse.data.success) {
-        alert("Funds have been transferred.");
+        setFundSuccessMessage("Funds have been transferred.");
         await withdrawFunds(user.uid, instantBalance);
       } else {
-        alert("Payout failed: " + payoutResponse.data.error);
+        setErrorMessage("Payout failed: " + payoutResponse.data.error);
       }
     } catch (error) {
       console.error("Payout error:", error);
-      alert("Error processing withdrawal.");
+      setErrorMessage("Error processing withdrawal.");
     }
 
     setLoading(false);
@@ -155,7 +157,7 @@ export default function AffiliatePayments() {
     });
 
     if (!onboardingCompleted.data.success) {
-        alert("Please complete your Stripe onboarding before withdrawing funds.");
+        setErrorMessage("Please complete your Stripe onboarding before withdrawing funds.");
         setLoading(false);
         return;
     }
@@ -164,7 +166,7 @@ export default function AffiliatePayments() {
     setLoading(false);
     
     if (success) {
-        alert("Withdrawal request submitted!");
+      setSuccessMessage("Withdrawal request submitted!");
         setTransactions((prevTransactions) =>
           prevTransactions.map((t) =>
             t.id === transaction.id ? { ...t, status: "requested" } : t
@@ -198,61 +200,14 @@ export default function AffiliatePayments() {
       </section>
 
       <div className="flex flex-col space-y-6 justify-center">
-        {/* <h2 className="text-secondary font-semibold text-xl">Payment Method</h2> */}
-        {/* <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-wrap gap-4">
-            {["PayPal", "Venmo", "Check"].map((method) => (
-              <div key={method} className="flex items-center">
-                <input
-                  type="radio"
-                  id={method.toLowerCase()}
-                  value={method}
-                  name="paymentMethod"
-                  checked={formData.paymentMethod === method}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                <label htmlFor={method.toLowerCase()}>{method}</label>
-              </div>
-            ))}
-          </div> */}
-
-          {/* <div className="flex flex-col space-y-2">
-            <label htmlFor="email" className="block text-md font-semibold">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-4 sm:p-6 bg-accent rounded-2xl placeholder-gray-700"
-              placeholder="user@email.com"
-              required
-            />
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="confirmEmail" className="block text-md font-semibold">Confirm Email Address</label>
-            <input
-              type="email"
-              id="confirmEmail"
-              name="confirmEmail"
-              value={formData.confirmEmail}
-              onChange={handleChange}
-              placeholder="user@email.com"
-              className="w-full p-4 sm:p-6 bg-accent rounded-2xl placeholder-gray-700"
-              required
-            />
-          </div> */}
-
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+          {fundSuccessMessage && <p className="text-green-500 text-sm">{fundSuccessMessage}</p>}
 
           <div className="flex justify-end">
             <button onClick={handleSubmit} disabled={loading} className="bg-secondary text-white py-2 px-6 text-md md:text-xl rounded-md mt-4">
               Withdraw
             </button>
           </div>
-        {/* </form> */}
       </div>
 
       <div className="my-4 space-y-3">
@@ -270,6 +225,8 @@ export default function AffiliatePayments() {
         </div>
         <div className="flex flex-col space-y-6 justify-center">
         <div className="my-4 overflow-x-auto">
+        {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
+
         <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
         <thead>
         <tr className="border-b text-sm md:text-lg">
