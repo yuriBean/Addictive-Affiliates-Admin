@@ -22,6 +22,7 @@ const BusinessSignUpForm = ({ onNext }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -52,12 +53,15 @@ const BusinessSignUpForm = ({ onNext }) => {
                 role: 'business',
             }
             const user = await signUp(formData.email, formData.password, additionalData);
-            await login(formData.email, formData.password);
             console.log("User created successfully!", user);
-            onNext(); 
+            if(user)
+            {await login(formData.email, formData.password);
+                onNext(); }
         } catch (error) {
             console.error("Error during signup:", error);
-            alert("Error during signup, please try again.");
+            setError(error.message || "An unexpected error occurred. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -193,6 +197,7 @@ const BusinessSignUpForm = ({ onNext }) => {
                     {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
             </form>
+            {error && <p className='text-red-500'>{error}</p>}
 
             <div className="mt-10 space-y-2 text-center">
                     <p className="text-sm text-black ">
@@ -204,12 +209,12 @@ const BusinessSignUpForm = ({ onNext }) => {
             </div>
 
             <div className="my-6 flex items-center justify-center space-x-4">
-    <hr className="border-t-2 border-secondary flex-grow" />
-    <p className="text-sm text-gray-600">Or Sign Up With</p>
-    <hr className="border-t-2 border-secondary flex-grow" />
-</div>
+                <hr className="border-t-2 border-secondary flex-grow" />
+                <p className="text-sm text-gray-600">Or Sign Up With</p>
+                <hr className="border-t-2 border-secondary flex-grow" />
+            </div>
 
-<div className="flex flex-col md:flex-row justify-center space-x-0 md:space-x-4 space-y-3 md:space-y-0 mb-4">
+            <div className="flex flex-col md:flex-row justify-center space-x-0 md:space-x-4 space-y-3 md:space-y-0 mb-4">
                 <div className='border-2 border-secondary px-12 py-2 rounded flex items-center justify-center'>
                     <button className="w-8 h-8 rounded-full bg-blue-600 text-white">
                         <FontAwesomeIcon icon={faFacebook} />

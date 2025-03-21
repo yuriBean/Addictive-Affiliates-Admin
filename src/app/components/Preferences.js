@@ -47,8 +47,10 @@ const Preferences = ({ onNext }) => {
     if (!user) return;
     try {
       setLoading(true);
-      await saveUserPreferences(user.uid, selectedPreferences);
-      onNext && onNext();
+      const success = await saveUserPreferences(user.uid, selectedPreferences);
+      if (success){
+        onNext && onNext();
+      }
     } catch (error) {
       console.error("Failed to save preferences:", error);
     } finally {
@@ -80,7 +82,7 @@ const Preferences = ({ onNext }) => {
             onClick={handleSubmit}
             className="py-2 px-6 w-full max-w-7xl bg-secondary text-white rounded hover:bg-purple-800"
           >
-            Set Preferences
+            {loading ? "Setting Preferences..." : "Set Preferences"}
           </button>
         </div>
       </div>

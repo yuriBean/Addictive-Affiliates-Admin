@@ -1,15 +1,23 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SignUpForm from "../components/AffiliateSignupForm";
 import ConnectSocial from "../components/ConnectSocial";
 import Preferences from "../components/Preferences";
 import AuthLayout from "../components/AuthLayout";
+import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
   const [step, setStep] = useState(1); 
+  const router = useRouter();
 
   const handleNext = () => setStep((prevStep) => prevStep + 1);
   const handleBack = () => setStep((prevStep) => prevStep - 1);
+
+  useEffect(() => {
+    if (step === 4) {
+      router.push("/dashboard");
+    }
+  }, [step, router]);
 
   return (
     <div>
@@ -23,7 +31,7 @@ const SignUpPage = () => {
         <p className="text-center mb-6 text-sm text-gray-600">
           Choose your preferences to personalize campaigns and connect with opportunities that align with your interests.
         </p>
-        <Preferences onBack={handleBack} />
+        <Preferences onBack={handleBack} onNext={handleNext} />
         </div>
         </AuthLayout>}
     </div>

@@ -772,6 +772,7 @@ export const saveUserPreferences = async (userId, preferences) => {
     { merge: true });
 
     console.log("Preferences saved successfully!");
+    return true;
   } catch (error) {
     console.error("Error saving preferences:", error);
     throw error;

@@ -12,9 +12,16 @@ export const signUp = async (email, password, additionalData) => {
     await createUser(user.uid, { email: user.email, ...additionalData });
     return user; 
   } catch (error) {
-    throw error;
+    if (error.code === "auth/email-already-in-use") {
+      throw new Error("The email is already in use. Please log in instead.");
+    } else if (error.code === "auth/weak-password") {
+      throw new Error("The password is too weak. Please choose a stronger one.");
+    }
+
+    throw new Error(error.message);
   }
 };
+
 export const logIn = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);

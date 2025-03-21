@@ -48,6 +48,10 @@ const ConnectSocialMedia = ({ onNext, onBack }) => {
         setInputVisible((prev) => ({ ...prev, [platform]: true })); 
     };
 
+    const handleSkip = () => {
+        onNext();
+    }
+
     return (
         <AuthLayout width={'max-w-2xl'}>
             <h1 className="text-2xl md:text-3xl font-bold text-center text-primary mb-4">
@@ -64,12 +68,12 @@ const ConnectSocialMedia = ({ onNext, onBack }) => {
                             <FontAwesomeIcon icon={icon} />
                         </div>
 
-                        <div className="flex-1 ml-4">
+                        <div className="flex-1 overflow-hidden ml-4">
                             {inputVisible[name] ? (
                                 <div className="flex flex-col gap-2 w-full">
                                     <input
                                         type="url"
-                                        placeholder={`Enter ${name} profile link`}
+                                        placeholder={`Enter profile link`}
                                         className="p-2 border border-gray-300 rounded-md text-black text-sm md:text-lg outline-none"
                                         value={socialLinks[name] || ""}
                                         onChange={(e) => handleChange(name, e.target.value)}
@@ -82,10 +86,10 @@ const ConnectSocialMedia = ({ onNext, onBack }) => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-center w-full">
                                     <span className="font-medium text-gray-800 text-sm md:text-lg">{name}</span>
                                     <button
-                                        className="px-4 py-2 bg-secondary text-white text-sm rounded-md hover:bg-purple-800"
+                                        className="p-2 bg-secondary text-white text-sm rounded-md hover:bg-purple-800"
                                         onClick={() => handleConnectClick(name)}
                                     >
                                         Connect
@@ -95,6 +99,14 @@ const ConnectSocialMedia = ({ onNext, onBack }) => {
                         </div>
                     </div>
                 ))}
+                <div className='flex justify-end'>
+                <button
+                    className="px-4 py-2 text-secondary text-md rounded-md"
+                    onClick={() => handleSkip()}
+                >
+                    Do it later
+                </button>
+                </div>
             </div>
         </AuthLayout>
     );

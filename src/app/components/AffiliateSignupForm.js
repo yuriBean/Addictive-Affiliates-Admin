@@ -19,6 +19,8 @@ const AffiliateSignUpForm = ({ onNext }) => {
     });
     
     const { login } = useAuth();
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,6 +35,7 @@ const AffiliateSignUpForm = ({ onNext }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
@@ -52,12 +55,15 @@ const AffiliateSignUpForm = ({ onNext }) => {
                 role: 'advertiser',
             }
             const user = await signUp(formData.email, formData.password, additionalData);
-            await login(formData.email, formData.password);
             console.log("User created successfully!", user);
-            onNext(); 
+            if(user)
+            {await login(formData.email, formData.password);
+                onNext(); }
         } catch (error) {
             console.error("Error during signup:", error);
-            alert("Error during signup, please try again.");
+            setError(error.message || "An unexpected error occurred. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -205,9 +211,10 @@ const AffiliateSignUpForm = ({ onNext }) => {
                     type="submit"
                     className="w-full py-2 mt-4 bg-secondary text-white rounded hover:bg-purple-800"
                 >
-                    Create Account
+                    {loading ? "Creating..." : "Create Account"}
                 </button>
             </form>
+            {error && <p className='text-red-500'>{error}</p>}
 
             <div className="mt-10 space-y-2 text-center">
                 <p className="text-sm text-black ">
