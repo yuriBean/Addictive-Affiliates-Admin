@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { getAffiliateLink, updateAffiliateLinkStats } from "@/app/firebase/firestoreService";
+import { editCampaign, editProduct, getAffiliateLink, updateAffiliateLinkStats } from "@/app/firebase/firestoreService";
 
 export default function Track() {
   const searchParams = useSearchParams();
@@ -21,6 +21,14 @@ export default function Track() {
         await updateAffiliateLinkStats(linkId, {
           clicks: (linkData.clicks || 0) + 1
         });
+
+        await editProduct(linkData.campaignId, linkData.productId, {
+          clicks: (linkData.clicks || 0) + 1
+        })
+
+        await editCampaign(linkData.businessId, linkData.campaignId, {
+          clicks: (linkData.clicks || 0) + 1
+        })
 
         if (typeof window !== "undefined" && linkData) {
         if (linkData.productUrl) {

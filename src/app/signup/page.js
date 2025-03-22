@@ -5,20 +5,36 @@ import ConnectSocial from "../components/ConnectSocial";
 import Preferences from "../components/Preferences";
 import AuthLayout from "../components/AuthLayout";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 const SignUpPage = () => {
+  const {user} = useAuth();
   const [step, setStep] = useState(1); 
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   const handleNext = () => setStep((prevStep) => prevStep + 1);
   const handleBack = () => setStep((prevStep) => prevStep - 1);
 
+  useEffect (() => {
+    if (user) {
+      router.push ("/dashboard");
+    }
+    setLoading(false);
+
+  }, [user]);
+
   useEffect(() => {
+
     if (step === 4) {
       router.push("/dashboard");
     }
   }, [step, router]);
 
+  if (loading) {
+    return <p className="text-center text-gray-500">Loading...</p>;
+  }
+  
   return (
     <div>
         {step === 1 && <SignUpForm onNext={handleNext} />}

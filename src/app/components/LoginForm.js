@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import AuthLayout from './AuthLayout';
@@ -17,8 +17,17 @@ const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const { login } = useAuth();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const {user} = useAuth();
+
+    useEffect (() => {
+        if (user) {
+          router.push ("/dashboard");
+        }
+        setLoading(false);
+    
+    }, [user]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;

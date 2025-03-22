@@ -156,7 +156,7 @@ export default function Campaign() {
           <p className="mt-3">{campaign.description ?? "No description available."}</p>
         </div>
 
-        <div className="my-6">
+        {/* <div className="my-6">
           <h2 className="text-lg text-secondary">Affiliate Link</h2>
           <div className="flex space-x-0 space-y-2 md:space-x-6 justify-between md:flex-row flex-col">
           <p className="text-gray-600 mt-2 w-full">
@@ -178,7 +178,7 @@ export default function Campaign() {
           </button>
           </div>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </div>

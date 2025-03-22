@@ -11,7 +11,7 @@ import { BarChart, Bar, Tooltip, XAxis, YAxis, Legend, ResponsiveContainer } fro
 export default function AffiliateDashboard() {
   const {user} = useAuth();
   const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [currentBalance, setCurrentBalance] = useState(0.00);
   const [lifetimeEarnings, setLifetimeEarnings] = useState(0.00);
   const [earningsByDate, setEarningsByDate] = useState([]);

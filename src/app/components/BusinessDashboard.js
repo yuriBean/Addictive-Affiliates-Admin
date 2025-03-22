@@ -12,7 +12,7 @@ export default function BusinessDashboardPage() {
   const {user} = useAuth();
   const [stats, setStats] = useState(null);
   const [campaigns, setCampaigns] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;

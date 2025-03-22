@@ -147,7 +147,6 @@ export const getAllUserCampaigns = async (userId) => {
     querySnapshot.forEach((doc) => {
       campaigns.push({ id: doc.id, ...doc.data() });
     });
-    console.log('All user campaigns: ', campaigns);
     return campaigns;
   } catch (error) {
     console.error("Error fetching campaigns:", error);
@@ -270,17 +269,6 @@ export const getAllProducts = async () => {
   }
 };
 
-export const contactUsForm = async (userId, contactData) => {
-  try {
-    const contactRef = doc(db, "contactUs", userId); 
-    await setDoc(contactRef, contactData);
-    console.log("Contact form submitted successfully!");    
-  } catch (error) {
-    console.error("Error saving contact form:", error);
-    throw error;
-  }
-};
-
 export const getProductsByCampaign = async (campaignId) => {
   try {
     const q = query(
@@ -327,6 +315,17 @@ export const bulkAddProducts = async (campaignId, products) => {
   await Promise.all(addProductPromises);
 };
 
+export const contactUsForm = async (userId, contactData) => {
+  try {
+    const contactRef = doc(db, "contactUs", userId); 
+    await setDoc(contactRef, contactData);
+    console.log("Contact form submitted successfully!");    
+  } catch (error) {
+    console.error("Error saving contact form:", error);
+    throw error;
+  }
+};
+
 export const getBusinessByCampaignId = async (campaignId) => {
   try {
     let business = null;
@@ -346,26 +345,33 @@ export const getBusinessByCampaignId = async (campaignId) => {
 
 export const generateAffiliateLink = async (userId, campaignId, productId = null, productUrl = "") => {
   try {
-    console.log('test2', userId, campaignId, productId)
+
+    let commissionRate = 0;
     if (productId) {
     const product = await getProduct(productId, campaignId);
       if (product) {
         productUrl = product.productUrl;
       }
     }
-    console.log("Recieved product url: ", productUrl);
+
+    const businessCampaignId = await getCampaignById(campaignId);
+    const businessId = businessCampaignId.userId;
+    if (businessCampaignId) {
+      commissionRate = businessCampaignId.commissionRate || 0;
+    }
 
     const utmParams = new URLSearchParams({
       utm_source: "affiliate",
       utm_medium: "referral",
       utm_campaign: campaignId,
+      utm_product: productId,
       utm_content: userId,
+      utm_commission_rate: commissionRate,
       utm_affiliate_network:"AddictiveAffiliates",
     });
 
     const finalProductUrl = productUrl ? `${productUrl}?${utmParams.toString()}` : null;
-    const businessCampaignId = await getCampaignById(campaignId);
-    const businessId = businessCampaignId.userId;
+    
 
     const linkData = {
       affiliateId: userId,
@@ -413,6 +419,21 @@ export const getAffiliateLink = async (linkId) => {
   }
 };
 
+export const getAffiliateLinkByAffiliate = async (affiliateId, productId) => {
+  try {
+    const linksRef = collection(db, "affiliateLinks");
+    const querySnapshot = await getDocs(
+      query(linksRef, where("affiliateId", "==", affiliateId), where("productId", "==", productId))
+    );
+
+    return querySnapshot.empty ? null : { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+  } catch (error) {
+    console.error("Error fetching affiliate link:", error);
+    throw error;
+  }
+};
+
+
 export const updateAffiliateLinkStats = async (linkId, updateData) => {
   try {
     const linkRef = doc(db, "affiliateLinks", linkId);
@@ -443,10 +464,13 @@ const getCampaignName = async (campaignId, userId) => {
   try {
     const campaignRef = doc(db, `campaigns/${userId}/userCampaigns/${campaignId}`);
     const campaignSnap = await getDoc(campaignRef);
+
     if (!campaignSnap.exists()) {
+      console.warn(`Campaign not found: ${campaignId} for user ${userId}`);
       return "Unknown Campaign";
     }
     const campaignData = campaignSnap.data();
+
     return campaignData.campaignName || "Unknown Campaign";
   } catch (error) {
     console.error("Error fetching campaign name:", error);
@@ -458,28 +482,30 @@ const getCampaignName = async (campaignId, userId) => {
 export const getAffiliateStats = async (userId) => {
   try {
     const linksRef = collection(db, "affiliateLinks");
-    const affiliateQuery = query(linksRef, where("affiliateId", "==", userId));
-    const businessQuery = query(linksRef, where("businessId", "==", userId));
+    const transactionsRef = collection(db, "transactions");
 
-    const [affiliateSnapshot, businessSnapshot] = await Promise.all([
+    const affiliateQuery = query(linksRef, where("affiliateId", "==", userId));
+    const earningsQuery = query(transactionsRef, where("userId", "==", userId));
+
+    const [affiliateSnapshot, earningsSnapshot] = await Promise.all([
       getDocs(affiliateQuery),
-      getDocs(businessQuery)
-    ]);    
-    
-    const querySnapshot = [...affiliateSnapshot.docs, ...businessSnapshot.docs];
+      getDocs(earningsQuery),
+    ]);
 
     const stats = {
       totalClicks: 0,
       totalConversions: 0,
       totalRevenue: 0,
+      totalEarnings: 0, 
       activeLinks: 0,
-      topCampaigns: []
+      earningsByDate: {}, 
+      topCampaigns: [],
     };
 
     const campaignStats = {};
     const campaignFetchPromises = [];
 
-    querySnapshot.forEach(doc => {
+    affiliateSnapshot.forEach((doc) => {
       const data = doc.data();
       stats.totalClicks += data.clicks || 0;
       stats.totalConversions += data.conversions || 0;
@@ -492,7 +518,7 @@ export const getAffiliateStats = async (userId) => {
             clicks: 0,
             conversions: 0,
             revenue: 0,
-            campaignName: "", 
+            campaignName: "",
           };
         }
         campaignStats[data.campaignId].clicks += data.clicks || 0;
@@ -500,11 +526,22 @@ export const getAffiliateStats = async (userId) => {
         campaignStats[data.campaignId].revenue += data.revenue || 0;
 
         campaignFetchPromises.push(
-          getCampaignName(data.campaignId, userId).then(name => {
+          getCampaignName(data.campaignId, userId).then((name) => {
             campaignStats[data.campaignId].campaignName = name;
           })
         );
       }
+    });
+
+    earningsSnapshot.forEach((doc) => {
+      const { amount, date } = doc.data();
+      stats.totalEarnings += amount || 0;
+
+      const dateKey = new Date(date).toISOString().split("T")[0]; 
+      if (!stats.earningsByDate[dateKey]) {
+        stats.earningsByDate[dateKey] = 0;
+      }
+      stats.earningsByDate[dateKey] += amount;
     });
 
     await Promise.all(campaignFetchPromises);
@@ -513,7 +550,7 @@ export const getAffiliateStats = async (userId) => {
       .map(([id, data]) => ({
         id,
         ...data,
-        conversionRate: data.clicks > 0 ? (data.conversions / data.clicks * 100).toFixed(1) : 0
+        conversionRate: data.clicks > 0 ? ((data.conversions / data.clicks) * 100).toFixed(1) : 0,
       }))
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
@@ -564,13 +601,15 @@ export const submitWithdrawalRequest = async (transactionId, userEmail) => {
   }
 };
 
-export const recordConversion = async (campaignId, affiliateId, orderValue, commissionRate) => {
+export const recordConversion = async (campaignId, affiliateId, productId, orderValue, commissionRate) => {
   try {
     const linkQuery = query(
       collection(db, "affiliateLinks"),
       where("campaignId", "==", campaignId),
-      where("affiliateId", "==", affiliateId)
+      where("affiliateId", "==", affiliateId),
+      where("productId", "==", productId),
     );
+
 
     const linkSnap = await getDocs(linkQuery);
 
@@ -584,11 +623,24 @@ export const recordConversion = async (campaignId, affiliateId, orderValue, comm
 
     const earnedCommission = orderValue * commissionRate;
 
+    const businessCampaignId = await getCampaignById(linkData.campaignId);
+    const businessId = businessCampaignId.userId;
+
     await updateDoc(doc(db, "affiliateLinks", linkId), {
       conversions: increment(1),
       revenue: increment(orderValue),
       conversionDates: arrayUnion(new Date()),
     });
+
+    await editProduct(campaignId, productId, {
+      conversions: increment(1),
+      revenue: increment(orderValue),
+    });
+
+    await editCampaign(businessId, campaignId, {
+      conversions: increment(1),
+      revenue: increment(orderValue),
+    });    
 
     const accountRef = doc(db, "accounts", affiliateId);
     const accountSnap = await getDoc(accountRef);
@@ -604,9 +656,6 @@ export const recordConversion = async (campaignId, affiliateId, orderValue, comm
         currentBalance: increment(0)
       });
     }
-    
-    const businessCampaignId = await getCampaignById(linkData.campaignId);
-    const businessId = businessCampaignId.userId;
     
     const transactionRef = collection(db, "transactions");
     const transactionDoc = await addDoc(transactionRef, {

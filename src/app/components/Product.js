@@ -2,7 +2,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-import { getProduct, generateAffiliateLink } from "@/app/firebase/firestoreService";
+import { getProduct, generateAffiliateLink, getUser, getAffiliateLink, getAffiliateLinkByAffiliate } from "@/app/firebase/firestoreService";
 
 export default function ProductPage() {
     const { user } = useAuth();
@@ -14,6 +14,7 @@ export default function ProductPage() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [userRole, setUserRole] = useState('');
 
     useEffect(() => {
         if (!user || !campaignId || !productId) return;
@@ -30,8 +31,46 @@ export default function ProductPage() {
             setLoading(false);
           }
         };
-    
+
+        const fetchUser = async () => {
+          try{
+            setLoading(true);
+            const fetchedUser = await getUser(user.uid);
+            if (fetchedUser.role === "business"){
+              setUserRole("business")
+            } else {
+              setUserRole("affiliate")
+            }
+          } catch (err) {
+            throw err;
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        const fetchAffiliateLink = async () => {
+          try {
+            const affiliateLinkData = await getAffiliateLinkByAffiliate(user.uid, productId);
+            console.log('o');
+        
+            if (affiliateLinkData) {
+              const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+        
+              const formattedLink = {
+                ...affiliateLinkData,
+                link: `${baseUrl}/track?linkId=${affiliateLinkData.id}`
+              };
+              console.log('o', formattedLink);
+              setAffiliateLink(formattedLink);
+            }
+          } catch (error) {
+            console.error("Error fetching affiliate link:", error);
+          }
+        };
+          
+        fetchUser();
         fetchProduct();
+        fetchAffiliateLink();
       }, [user, campaignId, productId]); 
     
       if (loading) {
@@ -45,7 +84,6 @@ export default function ProductPage() {
       const handleGenerateLink = async () => {
         try {
           setGeneratingLink(true);
-          console.log('test1', user.uid, campaignId, productId )
           const linkData = await generateAffiliateLink(user.uid, campaignId, productId);
           setAffiliateLink(linkData);
         } catch (error) {
@@ -114,6 +152,7 @@ export default function ProductPage() {
           </p>
         </div>
 
+      {userRole === "affiliate" && (
         <div className="my-6">
           <h2 className="text-lg text-secondary">Affiliate Link</h2>
           <div className="flex space-x-0 space-y-2 md:space-x-6 justify-between md:flex-row flex-col">
@@ -124,7 +163,7 @@ export default function ProductPage() {
             <button 
             className="bg-secondary p-4 py-2 text-white rounded"
             onClick={handleGenerateLink}
-              disabled={generatingLink}
+            disabled={generatingLink || !!affiliateLink}
             >
               {generatingLink ? "Generating..." : "Generate Link"}
             </button>
@@ -137,6 +176,7 @@ export default function ProductPage() {
           </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

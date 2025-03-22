@@ -7,18 +7,25 @@ import BusinessDashboardPage from "../components/BusinessDashboard";
 
 export default function Dashboard() {
   const {user} = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
     if (!user) return;
 
     const getUserRole = async () => {
-      const fetchedUser = await getUser(user.uid);
-      setUserRole(fetchedUser.role);
-  }
+      setLoading(true);
+      try {
+        const fetchedUser = await getUser(user.uid);
+        setUserRole(fetchedUser.role);
+      } catch (error) {
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    }
+    
      getUserRole();
-     setLoading(false);
   }, [user]);
 
   if (loading) {
