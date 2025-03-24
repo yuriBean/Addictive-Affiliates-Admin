@@ -447,7 +447,7 @@ export const updateAffiliateLinkStats = async (linkId, updateData) => {
 export const getUserAffiliateLinks = async (userId) => {
   try {
     const linksRef = collection(db, "affiliateLinks");
-    const q = query(linksRef, where("userId", "==", userId));
+    const q = query(linksRef, where("affiliateId", "==", userId));
     const querySnapshot = await getDocs(q);
     
     return querySnapshot.docs.map(doc => ({
@@ -460,45 +460,16 @@ export const getUserAffiliateLinks = async (userId) => {
   }
 };
 
-const getCampaignName = async (campaignId, userId) => {
-  try {
-    const campaignRef = doc(db, `campaigns/${userId}/userCampaigns/${campaignId}`);
-    const campaignSnap = await getDoc(campaignRef);
-
-    if (!campaignSnap.exists()) {
-      console.warn(`Campaign not found: ${campaignId} for user ${userId}`);
-      return "Unknown Campaign";
-    }
-    const campaignData = campaignSnap.data();
-
-    return campaignData.campaignName || "Unknown Campaign";
-  } catch (error) {
-    console.error("Error fetching campaign name:", error);
-    return "Unknown Campaign";
-  }
-};
-
-
 export const getAffiliateStats = async (userId) => {
   try {
     const linksRef = collection(db, "affiliateLinks");
-    const transactionsRef = collection(db, "transactions");
-
     const affiliateQuery = query(linksRef, where("affiliateId", "==", userId));
-    const earningsQuery = query(transactionsRef, where("userId", "==", userId));
-
-    const [affiliateSnapshot, earningsSnapshot] = await Promise.all([
-      getDocs(affiliateQuery),
-      getDocs(earningsQuery),
-    ]);
+    const affiliateSnapshot = await getDocs(affiliateQuery);
 
     const stats = {
       totalClicks: 0,
       totalConversions: 0,
       totalRevenue: 0,
-      totalEarnings: 0, 
-      activeLinks: 0,
-      earningsByDate: {}, 
       topCampaigns: [],
     };
 
@@ -510,7 +481,6 @@ export const getAffiliateStats = async (userId) => {
       stats.totalClicks += data.clicks || 0;
       stats.totalConversions += data.conversions || 0;
       stats.totalRevenue += data.revenue || 0;
-      if (data.isActive) stats.activeLinks++;
 
       if (data.campaignId) {
         if (!campaignStats[data.campaignId]) {
@@ -526,22 +496,13 @@ export const getAffiliateStats = async (userId) => {
         campaignStats[data.campaignId].revenue += data.revenue || 0;
 
         campaignFetchPromises.push(
-          getCampaignName(data.campaignId, userId).then((name) => {
-            campaignStats[data.campaignId].campaignName = name;
+          getCampaignById(data.campaignId).then((campaign) => {
+            if (campaign && campaign.campaignName) {
+              campaignStats[data.campaignId].campaignName = campaign.campaignName; 
+            }
           })
         );
       }
-    });
-
-    earningsSnapshot.forEach((doc) => {
-      const { amount, date } = doc.data();
-      stats.totalEarnings += amount || 0;
-
-      const dateKey = new Date(date).toISOString().split("T")[0]; 
-      if (!stats.earningsByDate[dateKey]) {
-        stats.earningsByDate[dateKey] = 0;
-      }
-      stats.earningsByDate[dateKey] += amount;
     });
 
     await Promise.all(campaignFetchPromises);
@@ -724,29 +685,6 @@ export const approveTransaction = async (transactionId, affiliateId, businessId,
   }
 };
 
-export const getEarningsByDate = async (userId) => {
-  const querySnapshot = await getDocs(collection(db, "affiliateLinks"));
-  const earningsMap = {};
-
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    if (data.affiliateId === userId && data.conversionDates?.length > 0) {
-      data.conversionDates.forEach((date) => {
-        const formattedDate = format(date.toDate(), "yyyy-MM-dd"); 
-
-        if (!earningsMap[formattedDate]) {
-          
-          earningsMap[formattedDate] = { date: formattedDate, revenue: 0 };
-        }
-
-        earningsMap[formattedDate].revenue += (data.revenue || 0) / data.conversionDates.length; 
-      });
-    }
-  });
-
-  return Object.values(earningsMap);
-};
-
 export const fetchRequests = async (businessId) => {
   try {
     const q = query(collection(db, "transactions"), where("businessId", "==", businessId));
@@ -859,7 +797,12 @@ export const withdrawFunds = async (userId, amount) => {
     if (currentBalance < amount) {
       throw new Error("Insufficient balance");
     }
-    return { success: true, newBalance: currentBalance - amount };
+
+    const newBalance = currentBalance - amount;
+
+    await updateDoc(accountRef, { currentBalance: newBalance });
+
+    return { success: true, newBalance };
   } catch (error) {
     console.error("Error withdrawing funds:", error);
     return { success: false, error: error.message };
@@ -878,5 +821,57 @@ export const saveSocialLink = async (userId, platform, link) => {
   } catch (error) {
       console.error("Error saving social link:", error);
       alert("Failed to save social link. Please try again.");
+  }
+};
+
+export const getTotalEarnings = async (userId) => {
+  try {
+
+    const campaigns = await getAllCampaigns();
+    const transactionsQuery = query(collection(db, "transactions"), where("affiliateId", "==", userId));
+    const transactionsSnapshot = await getDocs(transactionsQuery);
+    const transactions = transactionsSnapshot.docs.map((doc) => doc.data());
+
+    const earningsByCampaign = transactions.reduce((acc, transaction) => {
+      const campaign = campaigns.find((c) => c.id === transaction.campaignId);
+      if (!campaign) return acc;
+
+      const existingEntry = acc.find((e) => e.campaignName === campaign.campaignName);
+      if (existingEntry) {
+        existingEntry.amount += transaction.amount;
+      } else {
+        acc.push({ campaignName: campaign.campaignName, revenue: transaction.amount });
+      }
+      return acc;
+    }, []);
+
+    return earningsByCampaign;
+
+  } catch (error) {
+    console.error("Error getting total earnings:", error);
+  }
+}
+
+export const getTotalEarningsByDate = async (userId) => {
+  try {
+    const transactionsQuery = query(collection(db, "transactions"), where("affiliateId", "==", userId));
+    const transactionsSnapshot = await getDocs(transactionsQuery);
+    const transactions = transactionsSnapshot.docs.map((doc) => doc.data());
+
+    const earningsByDate = transactions.reduce((acc, transaction) => {
+    const transactionDate = new Date(transaction.date.seconds * 1000).toISOString().split("T")[0]; 
+
+      if (acc[transactionDate]) {
+        acc[transactionDate] += transaction.amount;
+      } else {
+        acc[transactionDate] = transaction.amount;
+      }
+      return acc;
+    }, {});
+
+    return earningsByDate;
+
+  } catch (error) {
+    console.error("Error getting total earnings:", error);
   }
 };

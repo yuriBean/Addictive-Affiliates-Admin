@@ -162,8 +162,11 @@ export default function AffiliatePayments() {
         return;
     }
 
-    const success = await submitWithdrawalRequest(transaction.id, user.email);
+    let success;
+    if (onboardingCompleted.data.success) {
+    success = await submitWithdrawalRequest(transaction.id, user.email);
     setLoading(false);
+    }
     
     if (success) {
       setSuccessMessage("Withdrawal request submitted!");

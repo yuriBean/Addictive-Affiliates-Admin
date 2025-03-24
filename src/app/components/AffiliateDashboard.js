@@ -4,7 +4,7 @@ import { faArrowRight, faMousePointer } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState } from "react";
-import { getAffiliateStats, fetchBalance, getEarningsByDate } from "@/app/firebase/firestoreService";
+import { getAffiliateStats, fetchBalance, getTotalEarningsByDate, getTotalEarnings } from "@/app/firebase/firestoreService";
 import Link from "next/link";
 import { BarChart, Bar, Tooltip, XAxis, YAxis, Legend, ResponsiveContainer } from "recharts";
 
@@ -15,6 +15,7 @@ export default function AffiliateDashboard() {
   const [currentBalance, setCurrentBalance] = useState(0.00);
   const [lifetimeEarnings, setLifetimeEarnings] = useState(0.00);
   const [earningsByDate, setEarningsByDate] = useState([]);
+  const [earningsByCampaign, setEarningsByCampaign] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -24,10 +25,15 @@ export default function AffiliateDashboard() {
         setLoading(true);
         const affiliateStats = await getAffiliateStats(user.uid);
         const balance = await fetchBalance(user.uid);
-        const data = await getEarningsByDate(user.uid);
+        const data = await getTotalEarningsByDate(user.uid);
+        const earningsByCampaign = await getTotalEarnings(user.uid);
+        setEarningsByCampaign(earningsByCampaign);
         setCurrentBalance(balance.currentBalance);
         setLifetimeEarnings(balance.lifetimeEarnings);
-        setEarningsByDate(data);
+        const formattedData = Object.entries(data).map(([date, revenue]) => ({
+          date, revenue
+        }));
+        setEarningsByDate(formattedData);
         setStats(affiliateStats);
       } catch (error) {
         console.error("Error fetching affiliate stats:", error);
@@ -64,9 +70,9 @@ export default function AffiliateDashboard() {
               <div className="mb-6 col-span-1">
                 <h3 className="text-lg font-normal">Earnings (USD)</h3>
                 <div className="h-60 bg-white border border-gray-400 rounded-lg mt-2 p-4 flex items-center justify-center">
-                    {stats?.topCampaigns?.length > 0 ? (
+                    {earningsByCampaign?.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.topCampaigns}>
+                      <BarChart data={earningsByCampaign}>
                         <XAxis dataKey="campaignName" />
                         <YAxis />
                         <Tooltip />
@@ -95,7 +101,7 @@ export default function AffiliateDashboard() {
                 </BarChart>
               </ResponsiveContainer>
               ) : (
-                <p className="text-gray-500">No campaign earnings available</p>
+                <p className="text-gray-500">No earnings available</p>
               )}
               </div> 
               

@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -26,6 +28,11 @@ const Navbar = () => {
           <Link href="/">
             <p className="hover:underline">Home</p>
           </Link>
+          {user && (
+            <Link href="/dashboard">
+            <p className="hover:underline">Dashboard</p>
+          </Link>
+          )}
           <Link href="/about">
             <p className="hover:underline">About</p>
           </Link>
@@ -36,6 +43,9 @@ const Navbar = () => {
           <Link href="/signup" className='flex space-x-8'>
             <span>|</span>
             <p className="hover:underline">Signup</p>
+          </Link>
+          <Link href="/login" className='flex space-x-8'>
+            <p className="hover:underline">Login</p>
           </Link>
         </div>
 
@@ -53,6 +63,11 @@ const Navbar = () => {
           <Link href="/">
             <p className="block hover:underline">Home</p>
           </Link>
+          {user && (
+            <Link href="/dashboard">
+            <p className="hover:underline">Dashboard</p>
+          </Link>
+          )}
           <Link href="/about">
             <p className="block hover:underline">About</p>
           </Link>
@@ -61,6 +76,9 @@ const Navbar = () => {
           </Link>
           <Link href="/signup">
             <p className="hover:underline border-t-2 border-gray-500 mt-3">Signup</p>
+          </Link>
+          <Link href="/login">
+            <p className="hover:underline">Login</p>
           </Link>
         </div>
       )}
