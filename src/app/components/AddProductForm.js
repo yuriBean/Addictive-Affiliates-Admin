@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { addProduct, getAllUserCampaigns, getUser } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { uploadMediaFiles } from "./UploadImage";
 
 export default function AddProductForm() {
   const { user } = useAuth();
@@ -93,13 +94,28 @@ export default function AddProductForm() {
     }
   };
   
-  const handleImageUpload = (event) => {
+  const handleMediaUpload = async (event) => {
     const files = Array.from(event.target.files);
-    setFormData((prevData) => ({
-      ...prevData,
-      images: [...prevData.images, ...files],
-    }));
+  
+    if (files.length === 0) return;
+  
+    setLoading(true);
+    setErrorMessage("");
+  
+    try {
+      const uploadedFiles = await uploadMediaFiles(files);
+      setFormData((prevData) => ({
+        ...prevData,
+        images: [...prevData.images, ...uploadedFiles.map((file) => file.url)],
+      }));
+    } catch (error) {
+      setErrorMessage("Failed to upload files. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const validateForm = () => {
     if (!formData.productName.trim()) return setErrorMessage("Product name is required.");
@@ -284,7 +300,13 @@ export default function AddProductForm() {
         </div>
         
           <label className="w-64 h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
-            <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
+          <input
+              type="file"
+              multiple
+              accept="image/*,video/*,.pdf,.doc,.docx"
+              onChange={handleMediaUpload}
+              className="w-full p-4 bg-accent rounded-md placeholder-gray-700"
+            />
             <FontAwesomeIcon icon={faUpload} className="text-2xl md:text-4xl" />
             <p className="text-gray-600 mt-2">Click or drag images here</p>
           </label>

@@ -17,6 +17,19 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Addictive Affiliates",
   description: "Track, optimize, and scale your campaigns with ease.",
+  openGraph: {
+    title: "Addictive Affiliates",
+    description: "Track, optimize, and scale your campaigns with ease.",
+    images: [
+      {
+        url: "/logo.png", 
+        width: 1200,
+        height: 630,
+        alt: "Addictive Affiliates Preview",
+      },
+    ],
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {
