@@ -471,10 +471,13 @@ export const getAffiliateStats = async (userId) => {
       totalConversions: 0,
       totalRevenue: 0,
       topCampaigns: [],
+      topProducts: [],
     };
 
     const campaignStats = {};
+    const productStats = {};
     const campaignFetchPromises = [];
+    const productFetchPromises = [];
 
     affiliateSnapshot.forEach((doc) => {
       const data = doc.data();
@@ -503,9 +506,25 @@ export const getAffiliateStats = async (userId) => {
           })
         );
       }
-    });
+      if (data.productId) {
+        if (!productStats[data.productId]) {
+          productStats[data.productId] = { clicks: 0, conversions: 0, revenue: 0, productName: "" };
+        }
+        productStats[data.productId].clicks += data.clicks || 0;
+        productStats[data.productId].conversions += data.conversions || 0;
+        productStats[data.productId].revenue += data.revenue || 0;
+  
+        productFetchPromises.push(
+          getProduct(data.productId, data.campaignId).then((product) => {
+            if (product && product.productName) {
+              productStats[data.productId].productName = product.productName;
+            }
+          })
+        );
+      }
+    });  
 
-    await Promise.all(campaignFetchPromises);
+  await Promise.all([...campaignFetchPromises, ...productFetchPromises]);
 
     stats.topCampaigns = Object.entries(campaignStats)
       .map(([id, data]) => ({
@@ -515,6 +534,108 @@ export const getAffiliateStats = async (userId) => {
       }))
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
+
+      stats.topProducts = Object.entries(productStats)
+      .map(([id, data]) => ({
+        id,
+        ...data,
+        conversionRate: data.clicks > 0 ? ((data.conversions / data.clicks) * 100).toFixed(1) : 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+
+    return stats;
+  } catch (error) {
+    console.error("Error fetching affiliate stats:", error);
+    throw error;
+  }
+};
+
+export const getBusinessStats = async (userId) => {
+  try {
+    const linksRef = collection(db, "affiliateLinks");
+    const affiliateQuery = query(linksRef, where("businessId", "==", userId));
+    const affiliateSnapshot = await getDocs(affiliateQuery);
+
+    const stats = {
+      totalClicks: 0,
+      totalConversions: 0,
+      totalRevenue: 0,
+      topCampaigns: [],
+      topProducts: [],
+    };
+
+    const campaignStats = {};
+    const productStats = {};
+    const campaignFetchPromises = [];
+    const productFetchPromises = [];
+
+    affiliateSnapshot.forEach((doc) => {
+      const data = doc.data();
+      stats.totalClicks += data.clicks || 0;
+      stats.totalConversions += data.conversions || 0;
+      stats.totalRevenue += data.revenue || 0;
+
+      if (data.campaignId) {
+        if (!campaignStats[data.campaignId]) {
+          campaignStats[data.campaignId] = {
+            clicks: 0,
+            conversions: 0,
+            revenue: 0,
+            campaignName: "",
+          };
+        }
+        campaignStats[data.campaignId].clicks += data.clicks || 0;
+        campaignStats[data.campaignId].conversions += data.conversions || 0;
+        campaignStats[data.campaignId].revenue += data.revenue || 0;
+
+        campaignFetchPromises.push(
+          getCampaignById(data.campaignId).then((campaign) => {
+            if (campaign && campaign.campaignName) {
+              campaignStats[data.campaignId].campaignName = campaign.campaignName; 
+            }
+          })
+        );
+      }
+      if (data.productId) {
+        if (!productStats[data.productId]) {
+          productStats[data.productId] = { clicks: 0, conversions: 0, revenue: 0, productName: "" };
+        }
+        productStats[data.productId].clicks += data.clicks || 0;
+        productStats[data.productId].conversions += data.conversions || 0;
+        productStats[data.productId].revenue += data.revenue || 0;
+  
+        productFetchPromises.push(
+          getProduct(data.productId, data.campaignId).then((product) => {
+            if (product && product.productName) {
+              productStats[data.productId].productName = product.productName;
+            }
+          })
+        );
+      }
+    });  
+
+  await Promise.all([...campaignFetchPromises, ...productFetchPromises]);
+
+    stats.topCampaigns = Object.entries(campaignStats)
+      .map(([id, data]) => ({
+        id,
+        ...data,
+        conversionRate: data.clicks > 0 ? ((data.conversions / data.clicks) * 100).toFixed(1) : 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+      stats.topProducts = Object.entries(productStats)
+      .map(([id, data]) => ({
+        id,
+        ...data,
+        conversionRate: data.clicks > 0 ? ((data.conversions / data.clicks) * 100).toFixed(1) : 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
 
     return stats;
   } catch (error) {
@@ -562,7 +683,7 @@ export const submitWithdrawalRequest = async (transactionId, userEmail) => {
   }
 };
 
-export const recordConversion = async (campaignId, affiliateId, productId, orderValue, commissionRate) => {
+export const recordConversion = async (campaignId, affiliateId, productId, orderValue, commissionRate, paymentType, pricePerAction) => {
   try {
     const linkQuery = query(
       collection(db, "affiliateLinks"),
@@ -570,7 +691,6 @@ export const recordConversion = async (campaignId, affiliateId, productId, order
       where("affiliateId", "==", affiliateId),
       where("productId", "==", productId),
     );
-
 
     const linkSnap = await getDocs(linkQuery);
 
@@ -582,29 +702,39 @@ export const recordConversion = async (campaignId, affiliateId, productId, order
     const linkId = linkDoc.id;
     const linkData = linkDoc.data();
 
-    const earnedCommission = orderValue * commissionRate;
-
     const businessCampaignId = await getCampaignById(linkData.campaignId);
     const businessId = businessCampaignId.userId;
 
+    const accountRef = doc(db, "accounts", affiliateId);
+    const accountSnap = await getDoc(accountRef);
+
+    let earnedCommission = 0;
+    let revenue = 0;
+
+    if (paymentType === "ppcv") {
+      earnedCommission = orderValue * commissionRate;
+      revenue = orderValue;
+    } else if (paymentType === "ppc" || paymentType === "ppj") {
+      earnedCommission = pricePerAction;
+      revenue = pricePerAction;
+    }
+
     await updateDoc(doc(db, "affiliateLinks", linkId), {
       conversions: increment(1),
-      revenue: increment(orderValue),
+      revenue: increment(revenue),
       conversionDates: arrayUnion(new Date()),
     });
 
     await editProduct(campaignId, productId, {
       conversions: increment(1),
-      revenue: increment(orderValue),
+      revenue: increment(revenue),
     });
 
     await editCampaign(businessId, campaignId, {
       conversions: increment(1),
-      revenue: increment(orderValue),
+      revenue: increment(revenue),
     });    
 
-    const accountRef = doc(db, "accounts", affiliateId);
-    const accountSnap = await getDoc(accountRef);
 
     if (!accountSnap.exists()) {
       await setDoc(accountRef, {
@@ -623,7 +753,7 @@ export const recordConversion = async (campaignId, affiliateId, productId, order
       affiliateId,
       businessId: businessId,
       email: linkData.email || '', 
-      amount: earnedCommission,
+      amount: Number(earnedCommission),
       date: new Date(),
       productId: linkData.productId,
       campaignId: linkData.campaignId,

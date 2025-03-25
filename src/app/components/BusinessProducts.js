@@ -48,10 +48,15 @@ export default function BusinessProducts() {
 
   const handleDelete = async (campaignId, productId) =>{
     try {
+      if (typeof window !== "undefined") {
+        const isConfirmed = window.confirm("Are you sure you want to delete?");
+
+        if (isConfirmed) {
       await deleteProduct(productId, campaignId );
-  
       setProducts((prev) => prev.filter((product) => product.id !== productId));
-  
+    }
+  }
+
     } catch (err) {
       console.error("Failed to delete product.", err);
     }
@@ -92,7 +97,7 @@ export default function BusinessProducts() {
                 <th className="px-4 py-2 text-left bg-accent rounded">Name</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Active</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Price</th>
-                <th className="px-4 py-2 text-left bg-accent rounded">Assigned Campaigns</th>
+                <th className="px-4 py-2 text-left bg-accent rounded">Campaigns</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Action</th>
               </tr>
             </thead>
@@ -117,7 +122,7 @@ export default function BusinessProducts() {
                       }
                     />
                   </td>
-                  <td className="px-4 py-2">${product.price}</td>
+                  <td className="px-4 py-2">${product.price || product.pricePerAction}</td>
                   <td className="px-4 py-2">{product.assignedCampaignName}</td>
                   <td className="px-4 py-2 flex justify-around items-center">
                   <Link href={`/dashboard/edit-product?productId=${product.id}&campaignId=${product.assignedCampaign}`} passHref>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { editCampaign, editProduct, getAffiliateLink, updateAffiliateLinkStats } from "@/app/firebase/firestoreService";
+import { editCampaign, editProduct, getAffiliateLink, getProduct, updateAffiliateLinkStats } from "@/app/firebase/firestoreService";
 
 export default function Track() {
   const searchParams = useSearchParams();
@@ -29,6 +29,21 @@ export default function Track() {
         await editCampaign(linkData.businessId, linkData.campaignId, {
           clicks: (linkData.clicks || 0) + 1
         })
+
+        const productData = await getProduct(linkData.productId, linkData.campaignId);
+        if (productData && ["ppc", "ppj"].includes(productData.paymentType)) {
+          await fetch("/api/track-conversion", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              campaignId: linkData.campaignId,
+              affiliateId: linkData.affiliateId,
+              productId: linkData.productId,
+              paymentType: productData.paymentType,
+              pricePerAction: productData.pricePerAction,
+            }),
+          });
+        }
 
         if (typeof window !== "undefined" && linkData) {
         if (linkData.productUrl) {

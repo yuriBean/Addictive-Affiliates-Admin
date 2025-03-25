@@ -258,7 +258,7 @@ export default function AffiliatePayments() {
                   }`}
                   disabled = {transaction.status === "requested" || transaction.status === "completed" }
                 >
-                  {transaction.status === "requested" ? 'Requested' : transaction.status === "completed" ? "Completed" : 'Request Transfer' }
+                  {loading ? "Sending request..." : transaction.status === "requested" ? 'Requested' : transaction.status === "completed" ? "Completed" : 'Request Transfer' }
                 </button>
             </td>
               </tr>

@@ -13,9 +13,11 @@ export default function AddProductForm() {
   const [formData, setFormData] = useState({
     productName: "",
     category: "",
+    paymentType: "ppcv",
     price: "",
     productUrl: "",
     description: "",
+    pricePerAction: "",
     assignedCampaign: "",
     assignedCampaignName: "",
     userId: user?.uid || "",
@@ -73,13 +75,15 @@ export default function AddProductForm() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
+  
     if (name === "assignedCampaign") {
       const selectedCampaign = campaigns.find((campaign) => campaign.id === value);
+  
       setFormData((prevData) => ({
         ...prevData,
         assignedCampaign: value,
         assignedCampaignName: selectedCampaign ? selectedCampaign.campaignName : "",
+        pricePerAction: selectedCampaign ? selectedCampaign.pricePerAction : "", 
       }));
     } else {
       setFormData((prevData) => ({
@@ -88,7 +92,7 @@ export default function AddProductForm() {
       }));
     }
   };
-
+  
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
     setFormData((prevData) => ({
@@ -97,6 +101,26 @@ export default function AddProductForm() {
     }));
   };
 
+  const validateForm = () => {
+    if (!formData.productName.trim()) return setErrorMessage("Product name is required.");
+    if (!formData.category) return setErrorMessage("Category is required.");
+    if (!formData.assignedCampaign) return setErrorMessage("Campaign selection is required.");
+    if (!formData.productUrl.trim()) return setErrorMessage("Product URL is required.");
+    if (!formData.description.trim()) return setErrorMessage("Description is required.");
+    
+    if (formData.paymentType === "ppcv" || formData.paymentType === "ppc"){
+      if (!formData.price || isNaN(formData.price) || formData.price <= 0) return setErrorMessage("Price must be a positive number.");
+    }
+
+    if (formData.paymentType === "ppj" && !formData.productUrl.trim().startsWith("https://chat.whatsapp.com/")) {
+      setErrorMessage("For Pay Per Join campaigns, the Product URL must be a WhatsApp group join link.");
+      return false;
+    }
+    
+    return "";
+  };
+
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!user) {
@@ -104,8 +128,9 @@ export default function AddProductForm() {
       return;
     }
 
-    if (formData.assignedCampaign === "") {
-      setErrorMessage("You must select a campaign for a product.");
+    const validationError = validateForm();
+    if (validationError) {
+      setErrorMessage(validationError);
       return;
     }
 
@@ -119,12 +144,14 @@ export default function AddProductForm() {
       setFormData({
         productName: "",
         category: "",
+        paymentType: "ppcv",
         price: "",
         productUrl: "",
         description: "",
         assignedCampaign: "",
         assignedCampaignName: "",
         userId: user.uid, 
+        pricePerAction: "",
         isActive: false,
         images: [],
       });
@@ -138,6 +165,10 @@ export default function AddProductForm() {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/dashboard/products");
+  }
+
   if (loading) return <p className="text-black text-center">Loading...</p>;
 
   return (
@@ -145,6 +176,8 @@ export default function AddProductForm() {
       {!campaigns.length > 0 && <p className="text-red-500 text-sm my-4">Create a campaign before adding products.</p>} 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4 text-sm md:text-md">
+      <div>
+        <small>Product Name</small>
           <input
             type="text"
             name="productName"
@@ -154,7 +187,10 @@ export default function AddProductForm() {
             placeholder="Product Name"
             required
           />
+        </div>
 
+      <div>
+        <small>Category</small>
           <select
             name="category"
             value={formData.category}
@@ -167,8 +203,29 @@ export default function AddProductForm() {
             <option key={category} value={category}>{category}</option>
             ))}
           </select>
+        </div>
 
-          <select
+        <div>
+          <small>Payment Type</small>
+          <div className="flex md:flex-row flex-col gap-4 my-3">
+            <label className="flex items-center">
+              <input type="radio" name="paymentType" value="ppc" checked={formData.paymentType === "ppc"} onChange={handleChange} className="mr-2" />
+              Pay Per Click
+            </label>
+            <label className="flex items-center">
+              <input type="radio" name="paymentType" value="ppcv" checked={formData.paymentType === "ppcv"} onChange={handleChange} className="mr-2" />
+              Pay Per Conversion
+            </label>
+            <label className="flex items-center">
+              <input type="radio" name="paymentType" value="ppj" checked={formData.paymentType === "ppj"} onChange={handleChange} className="mr-2" />
+              <div>Pay Per Join <small className=" p-1">(For WhatsApp Group Only)</small></div>
+            </label>
+          </div>
+        </div>
+        
+        <div>
+        <small>Campaign</small>
+        <select
             name="assignedCampaign"
             value={formData.assignedCampaign}
             onChange={handleChange}
@@ -176,23 +233,32 @@ export default function AddProductForm() {
             required
           >
             <option value="">Select Campaign</option>
-            {campaigns.map((campaign) => (
+            {campaigns
+            .filter((campaign) => campaign.paymentType === formData.paymentType)
+            .map((campaign) => (
               <option key={campaign.id} value={campaign.id}>
-                {campaign.campaignName}
+                {campaign.campaignName} -- Pay Per Action: ${campaign.pricePerAction}
               </option>
             ))}
           </select>
+            </div>
+            
+            <div className="overflow-hidden transition-all duration-300 ease-in-out" 
+            style={{ maxHeight: formData.paymentType === "ppj" ? "0px" : "100px", opacity: formData.paymentType === "ppj" ? 0 : 1 }}>       
+          <small>Price</small>
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+              placeholder="Price"
+              required = {formData.paymentType === "ppcv" || formData.paymentType === "ppc"}
+            />
+          </div>
 
-          <input
-            type="text"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
-            placeholder="Price"
-            required
-          />
-
+        <div>
+        <small>Product URL</small>
           <input
             type="text"
             name="productUrl"
@@ -202,7 +268,10 @@ export default function AddProductForm() {
             placeholder="Product URL"
             required
           />
+          </div>
 
+          <div>
+        <small>Description</small>
           <textarea
             name="description"
             value={formData.description}
@@ -212,7 +281,8 @@ export default function AddProductForm() {
             placeholder="Description"
             required
           />
-
+        </div>
+        
           <label className="w-64 h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
             <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
             <FontAwesomeIcon icon={faUpload} className="text-2xl md:text-4xl" />
@@ -221,13 +291,21 @@ export default function AddProductForm() {
 
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
-          <div className="flex justify-start">
+          <div className="flex justify-start gap-3">
             <button type="submit" className="bg-secondary text-white py-2 px-6 text-sm md:text-xl rounded mt-4" disabled={loading}>
               {loading ? "Adding..." : "Add Product"}
             </button>
+            <button
+              onClick={handleCancel}
+              type="button"
+              className="bg-red-500 text-white py-2 px-6 text-sm md:text-xl rounded mt-4"
+              disabled={loading}
+            >
+              Cancel
+            </button>
           </div>
         </form>
-    
+        
       </div>
     </div>
   );

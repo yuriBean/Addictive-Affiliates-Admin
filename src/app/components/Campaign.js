@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import { getCampaign, getCampaignById, getProductsByCampaign, getUser } from "@/app/firebase/firestoreService";
-import { generateAffiliateLink } from "@/app/firebase/firestoreService";
 
 export default function Campaign() {
     const { user } = useAuth();
@@ -14,8 +13,6 @@ export default function Campaign() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [affiliateLink, setAffiliateLink] = useState(null);
-    const [generatingLink, setGeneratingLink] = useState(false);
 
     useEffect(() => {
       if (!user) return;
@@ -70,38 +67,16 @@ export default function Campaign() {
         return <p className="text-center text-gray-500">{error || "Campaign not found."}</p>;
       }
     
-      const handleGenerateLink = async () => {
-        try {
-          setGeneratingLink(true);
-          const linkData = await generateAffiliateLink(user.uid, campaignId);
-          setAffiliateLink(linkData);
-        } catch (error) {
-          setError("Failed to generate affiliate link");
-          console.error(error);
-        } finally {
-          setGeneratingLink(false);
-        }
-      };
-    
-      const handleCopyLink = () => {
-        if (affiliateLink?.link) {
-          navigator.clipboard.writeText(affiliateLink.link);
-          alert("Affiliate link copied!");
-        }
-      };  
-    
   return (
     <div className="text-black mx-auto max-w-screen">
       <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">{campaign.campaignName}</h1>
       <div className="flex flex-col space-y-6 justify-center">
       
-      {/* <div className="flex items-center justify-center mb-4">
-          <img src={campaign.image} alt={campaign.campaignName} className="w-full h-60 object-cover rounded-lg" />
-        </div>         */}
-        <h2 className="text-lg text-secondary">Products</h2>
 
         <div className="my-4 overflow-x-auto">
-          <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
+        <h2 className="text-lg text-secondary">Products</h2>
+
+          <table className="min-w-full table-auto border-separate border-spacing-3">
             <thead>
               <tr className="border-b text-sm md:text-lg">
                 <th className="px-4 py-2 text-left bg-accent rounded">Product Name</th>
@@ -112,7 +87,9 @@ export default function Campaign() {
             </thead>
             <tbody>
               {products.length > 0 ? (
-                products.map((product) => (
+                products
+                .filter((product) => product.isActive)
+                .map((product) => (
                   <tr key={product.id} className="border-b text-sm md:text-lg">
                     <td className="px-4 py-2">
                     <Link href={`/dashboard/product?productId=${product.id}&campaignId=${product.assignedCampaign}`} title={product.productName}>
@@ -138,15 +115,29 @@ export default function Campaign() {
             </tbody>
           </table>
         </div>
+        
+        <div className="my-4">
+          <h2 className="text-lg text-secondary">Campaign Type</h2>
+          <p className="mt-3 ">{campaign.paymentType === "ppc" ? "Pay per click" : campaign.paymentType === "ppcv" ? "Pay per conversion" : `Pay per join (Whatsapp groups only)`}</p>
+        </div>
 
+        {campaign.paymentType === "ppcv" ? (
         <div className="my-4">
           <h2 className="text-lg text-secondary">Commission Rate</h2>
-          <p className="mt-3 font-semibold">{campaign.commissionRate ?? "N/A"}%</p>
+          <p className="mt-3 ">{campaign.commissionRate ?? "N/A"}%</p>
         </div>
+        ) : (
+          <div className="my-4">
+          <h2 className="text-lg text-secondary">Pay Per Action</h2>
+          <p className="mt-3">
+                ${campaign?.pricePerAction}
+          </p>
+        </div>
+        )}
 
         <div className="my-4">
           <h2 className="text-lg text-secondary">Campaign Duration</h2>
-          <p className="mt-3 font-semibold space-x-4">
+          <p className="mt-3  space-x-4">
             <span className="text-gray-500 md:text-md text-sm">{campaign.startDate ?? "N/A"}</span> <span>to</span> <span className="text-gray-500 md:text-md text-sm">{campaign.endDate ? (<>{campaign.endDate}</>) : "Ongoing"}</span>
           </p>
         </div>

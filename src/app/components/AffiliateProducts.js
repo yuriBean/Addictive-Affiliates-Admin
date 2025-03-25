@@ -21,7 +21,8 @@ export default function AffiliateProducts() {
       try {
         setLoading(true);
         const productList = await getAllProducts();
-        setProducts(productList);
+        const filteredProducts = productList.filter((product) => product.isActive)
+        setProducts(filteredProducts);
       } catch (err) {
         setError("Failed to fetch products.");
         console.error(err);
@@ -54,8 +55,8 @@ export default function AffiliateProducts() {
                 <h3 className="text-md md:text-lg font-bold mt-3">
                 {product.productName.length > 20 ? product.productName.slice(0, 25) + "..." : product.productName}
                 </h3>
-                <p className="text-gray-600 mt-1 text-sm">Price: {product.price}</p>
-                <small>{product.category}</small>
+                <p className="text-gray-600 mt-1 text-sm">Price: ${product.price || product.pricePerAction}</p>
+                <small>Product Type: {product.paymentType === "ppc" ? "Pay per click" : product.paymentType === "ppcv" ? "Pay per conversion" : `Pay per join (Whatsapp groups only)`}</small>
               </Link>
             ))}
           </div>

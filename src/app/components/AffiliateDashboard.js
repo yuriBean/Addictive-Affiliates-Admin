@@ -51,7 +51,7 @@ export default function AffiliateDashboard() {
 
     return (
       <div className="text-black">
-        <h1 className="text-2xl md:text-3xl text-headings font-bold mb-8">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl text-headings font-bold mb-8">Affiliate Dashboard</h1>
   
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Earnings</h2>
@@ -165,6 +165,50 @@ export default function AffiliateDashboard() {
                   <td className="p-5 border-b">{campaign.conversions}</td>
                   <td className="p-5 border-b">{campaign.clicks}</td>
                   <td className="p-5 border-b">{campaign.conversionRate}%</td>
+                </tr>
+              ))}
+              </>) : (
+                <tr>
+                <td colSpan="5" className="text-center py-4 text-gray-500">No campaigns to show</td>
+              </tr>               
+              )}
+            </tbody>
+            </table>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-12">
+          <h2 className="text-xl font-semibold mb-4">Top 5 Products</h2>
+          <div className="my-2 text-right">
+              <Link href="/dashboard/products" className="text-secondary font-bold">See More <FontAwesomeIcon icon={faArrowRight} /></Link>
+            </div>
+          <div className="bg-white p-4     rounded-lg border border-1 border-gray-300 shadow-lg">
+          <div className="overflow-x-auto">
+            <table className="md:min-w-full text-sm md:text-lg table-auto">
+              <thead>
+                <tr className="text-left border-b border-1 border-gray-200">
+                  <th className="p-5 border-b">Product Name</th>
+                  <th className="p-5 border-b">Revenue</th>
+                  <th className="p-5 border-b">Conversions</th>
+                  <th className="p-5 border-b">Clicks</th>
+                  <th className="p-5 border-b">CR</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-500">
+            {stats?.topProducts.length > 0 ? (
+              <>
+              {stats?.topProducts.map((product) => (
+                <tr key={product.id}>
+                  <td className="p-5 border-b text-black">{product.productName}</td>
+                  <td className="p-2 border-b text-black">
+                    <span className="bg-[#E8EDF2] rounded-md p-2 px-4 font-semibold">
+                      ${product.revenue.toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="p-5 border-b">{product.conversions}</td>
+                  <td className="p-5 border-b">{product.clicks}</td>
+                  <td className="p-5 border-b">{product.conversionRate}%</td>
                 </tr>
               ))}
               </>) : (

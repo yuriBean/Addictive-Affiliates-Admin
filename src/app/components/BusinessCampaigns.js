@@ -65,17 +65,21 @@ export default function BuinessCampaigns() {
     }
   };
 
-  const handleDelete = async (campaignId) =>{
+  const handleDelete = async (campaignId) => {
     try {
-      await deleteCampaign(user.uid, campaignId);
-  
-      setCampaigns((prev) => prev.filter((campaign) => campaign.id !== campaignId));
-  
+      if (typeof window !== "undefined") {
+        const isConfirmed = window.confirm("Are you sure you want to delete?");
+        
+        if (isConfirmed) {
+          await deleteCampaign(user.uid, campaignId);
+          setCampaigns((prev) => prev.filter((campaign) => campaign.id !== campaignId));
+        }
+      }
     } catch (err) {
       console.error("Failed to delete campaign.", err);
     }
-  }
-  
+  };
+    
   return (
     <div className="text-black mx-auto max-w-screen">
       <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE YOUR CAMPAIGNS</h1>
@@ -123,7 +127,7 @@ export default function BuinessCampaigns() {
                   <td className="px-4 py-2">
                     {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "Ongoing"}
                   </td>
-                  <td className="px-4 py-2">{campaign.CR}</td>
+                  <td className="px-4 py-2">{campaign.commissionRate}</td>
                   <td className="px-4 py-2 flex justify-around">
                   <Link href={`/dashboard/edit-campaign?id=${campaign.id}`} passHref>
                     <FontAwesomeIcon icon={faEdit} className="cursor-pointer" />

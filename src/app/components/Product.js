@@ -2,7 +2,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-import { getProduct, generateAffiliateLink, getUser, getAffiliateLink, getAffiliateLinkByAffiliate } from "@/app/firebase/firestoreService";
+import { getProduct, generateAffiliateLink, getUser, getAffiliateLink, getAffiliateLinkByAffiliate, getCampaignById } from "@/app/firebase/firestoreService";
 
 export default function ProductPage() {
     const { user } = useAuth();
@@ -15,65 +15,50 @@ export default function ProductPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [userRole, setUserRole] = useState('');
+    const [campaign, setCampaign] = useState('');
 
     useEffect(() => {
-        if (!user || !campaignId || !productId) return;
-    
-        const fetchProduct = async () => {
+      if (!user || !campaignId || !productId) return;
+  
+      const fetchData = async () => {
           try {
-            setLoading(true);
-            const product = await getProduct(productId, campaignId);
-            setProduct(product); 
+              setLoading(true);
+  
+              const [fetchedProduct, fetchedUser, fetchedCampaign, affiliateLinkData] = await Promise.all([
+                  getProduct(productId, campaignId),
+                  getUser(user.uid),
+                  getCampaignById(campaignId),
+                  getAffiliateLinkByAffiliate(user.uid, productId)
+              ]);
+  
+              setProduct(fetchedProduct);
+              setCampaign(fetchedCampaign);
+              
+              if (fetchedUser.role === "business") {
+                  setUserRole("business");
+              } else {
+                  setUserRole("affiliate");
+              }
+  
+              if (affiliateLinkData) {
+                  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+                  setAffiliateLink({
+                      ...affiliateLinkData,
+                      link: `${baseUrl}/track?linkId=${affiliateLinkData.id}`
+                  });
+              }
+  
           } catch (err) {
-            setError("Failed to fetch product.");
-            console.error(err);
+              console.error("Error fetching data:", err);
+              setError("Failed to fetch data.");
           } finally {
-            setLoading(false);
+              setLoading(false);
           }
-        };
-
-        const fetchUser = async () => {
-          try{
-            setLoading(true);
-            const fetchedUser = await getUser(user.uid);
-            if (fetchedUser.role === "business"){
-              setUserRole("business")
-            } else {
-              setUserRole("affiliate")
-            }
-          } catch (err) {
-            throw err;
-          } finally {
-            setLoading(false);
-          }
-        }
-
-        const fetchAffiliateLink = async () => {
-          try {
-            const affiliateLinkData = await getAffiliateLinkByAffiliate(user.uid, productId);
-            console.log('o');
-        
-            if (affiliateLinkData) {
-              const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-        
-              const formattedLink = {
-                ...affiliateLinkData,
-                link: `${baseUrl}/track?linkId=${affiliateLinkData.id}`
-              };
-              console.log('o', formattedLink);
-              setAffiliateLink(formattedLink);
-            }
-          } catch (error) {
-            console.error("Error fetching affiliate link:", error);
-          }
-        };
-          
-        fetchUser();
-        fetchProduct();
-        fetchAffiliateLink();
-      }, [user, campaignId, productId]); 
-    
-      if (loading) {
+      };
+  
+      fetchData();
+  }, [user, campaignId, productId]);
+        if (loading) {
         return <p className="text-center text-gray-500">Loading...</p>;
       }
     
@@ -135,7 +120,7 @@ export default function ProductPage() {
 
         <div className="my-4">
           <h2 className="text-lg text-secondary">Price</h2>
-          <p className="mt-3 font-bold text-lg">${product.price}</p>
+          <p className="mt-3 text-lg">${product.price}</p>
         </div>
 
         <div className="my-4">
@@ -144,6 +129,29 @@ export default function ProductPage() {
                 {product.category}
           </p>
         </div>
+
+        <div className="my-4">
+          <h2 className="text-lg text-secondary">Product Type</h2>
+          <p className="mt-3">
+                {campaign.paymentType === "ppc" ? "Pay per click" : campaign.paymentType === "ppcv" ? "Pay per conversion" : `Pay per join (Whatsapp groups only)`}
+          </p>
+        </div>
+
+        {campaign.paymentType === "ppcv" ? (
+        <div className="my-4">
+          <h2 className="text-lg text-secondary">Commission Rate</h2>
+          <p className="mt-3">
+                {campaign?.commissionRate}%
+          </p>
+        </div>
+        ) : (
+          <div className="my-4">
+          <h2 className="text-lg text-secondary">Pay Per Action</h2>
+          <p className="mt-3">
+                ${campaign?.pricePerAction}
+          </p>
+        </div>
+        )}
 
         <div className="my-4">
           <h2 className="text-lg text-secondary">Description</h2>

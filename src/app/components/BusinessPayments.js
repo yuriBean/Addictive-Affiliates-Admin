@@ -35,7 +35,8 @@ export default function BusinessPayments() {
     const getRequests = async () => {
         if (user.uid){
             const requestedTransfers = await fetchRequests(user.uid);
-            setRequests(requestedTransfers);
+            const filtererRequests = requestedTransfers.filter((request) => request.status !== "pending" )
+            setRequests(filtererRequests);
         }
     }
   
@@ -67,8 +68,14 @@ export default function BusinessPayments() {
   };
 
   const handleApproveRequest = async (request) => {
-    try {
+    let confirm;
+    if (typeof window !== "undefined") { 
+      confirm = window.confirm("Are you sure you want to make this transfer?");
+    }
 
+    if (confirm){
+    try {
+      setLoading(true);
       const businessStripeAccountId = await getStripeAccount(request.businessId);
       const affiliateStripeAccountId = await getStripeAccount(request.affiliateId);
       const response = await fetch("/api/transfer-payment", {
@@ -88,13 +95,17 @@ export default function BusinessPayments() {
       
       if (result.success) {
         await approveTransaction(request.id, request.affiliateId, request.businessId, request.amount);
+        setLoading(false);
         alert("Transfer request approved!");
       } else {
         throw new Error(result.message || "Transfer failed");
       }
     } catch (error) {
       alert(error.message);
+    } finally {
+      setLoading(false);
     }
+  }
   };  
 
   const handleDeposit = async (e) => {
@@ -180,7 +191,7 @@ export default function BusinessPayments() {
       <div className="my-8 md:my-4 space-y-3">
         <h2 className="text-secondary font-semibold text-xl">Requests</h2>
         <div className="flex flex-wrap gap-2 md:gap-4">
-          {["all", "completed", "pending", "requested", "rejected"].map((tab) => (
+          {["all", "completed", "requested", "rejected"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
@@ -199,7 +210,7 @@ export default function BusinessPayments() {
         <th className="px-4 py-2 text-left bg-accent rounded">Amount</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Affiliate Email</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Campaign/Product</th>
-        <th className="px-4 py-2 text-left bg-accent rounded">Conversions</th>
+        <th className="px-4 py-2 text-left bg-accent rounded">Status</th>
         <th className="px-4 py-2 text-left bg-accent rounded">Action</th>
       </tr>
     </thead>
@@ -226,7 +237,7 @@ export default function BusinessPayments() {
                   }`}
                   disabled = {request.status === "completed" }
                 >
-                  {request.status === "completed" ? "Approved" : 'Approve Transfer' }
+                  {loading ? "Transferring..." : request.status === "completed" ? "Approved" : 'Approve' }
                 </button>
             </td>
               </tr>

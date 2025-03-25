@@ -1,11 +1,9 @@
 "use client"
-import Image from "next/image";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import RoleSelection from "./components/RoleSelection";
 import ContactSection from "./components/ContactSection";
 import Footer from "./components/Footer";
-import Testimonials from "./components/Testimonials";
 
 export default function Home() {
   return (
@@ -23,7 +21,6 @@ export default function Home() {
         <Hero />
       </div>
     <RoleSelection />
-    {/* <Testimonials /> */}
     <ContactSection />
     <Footer /> 
   </>
