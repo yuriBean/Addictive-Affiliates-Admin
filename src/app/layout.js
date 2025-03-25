@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://addictiveaffiliates.com"),
   title: "Addictive Affiliates",
   description: "Track, optimize, and scale your campaigns with ease.",
   openGraph: {
