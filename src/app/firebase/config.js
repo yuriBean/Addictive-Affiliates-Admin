@@ -5,12 +5,12 @@ import { getFirestore } from 'firebase/firestore';
 let app, db, auth;
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCZthvsliNwlc6KHjSxhtxhdH6k1QRQPls",
-  authDomain: "addictive-affiliates.firebaseapp.com",
-  projectId: "addictive-affiliates",
-  storageBucket: "addictive-affiliates.firebasestorage.app",
-  messagingSenderId: "1059306485902",
-  appId: "1:1059306485902:web:601dc8d65ac68050e7f1df"
+  apiKey: "AIzaSyDVYUj4AIOMr3XvQdAFwUkNyEJzOJd9Dpw",
+  authDomain: "addictive-affiliates-33c65.firebaseapp.com",
+  projectId: "addictive-affiliates-33c65",
+  storageBucket: "addictive-affiliates-33c65.firebasestorage.app",
+  messagingSenderId: "839807598255",
+  appId: "1:839807598255:web:1434c21cec210e0a605e5a"
 };
 
  app = initializeApp(firebaseConfig);

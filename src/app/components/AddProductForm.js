@@ -94,27 +94,27 @@ export default function AddProductForm() {
     }
   };
   
-  const handleMediaUpload = async (event) => {
-    const files = Array.from(event.target.files);
+  // const handleMediaUpload = async (event) => {
+  //   const files = Array.from(event.target.files);
   
-    if (files.length === 0) return;
+  //   if (files.length === 0) return;
   
-    setLoading(true);
-    setErrorMessage("");
+  //   setLoading(true);
+  //   setErrorMessage("");
   
-    try {
-      const uploadedFiles = await uploadMediaFiles(files);
-      setFormData((prevData) => ({
-        ...prevData,
-        images: [...prevData.images, ...uploadedFiles.map((file) => file.url)],
-      }));
-    } catch (error) {
-      setErrorMessage("Failed to upload files. Please try again.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     const uploadedFiles = await uploadMediaFiles(files);
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       images: [...prevData.images, ...uploadedFiles.map((file) => file.url)],
+  //     }));
+  //   } catch (error) {
+  //     setErrorMessage("Failed to upload files. Please try again.");
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   
 
   const validateForm = () => {
@@ -299,7 +299,7 @@ export default function AddProductForm() {
           />
         </div>
         
-          <label className="w-64 h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
+          {/* <label className="w-64 h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
           <input
               type="file"
               multiple
@@ -309,7 +309,7 @@ export default function AddProductForm() {
             />
             <FontAwesomeIcon icon={faUpload} className="text-2xl md:text-4xl" />
             <p className="text-gray-600 mt-2">Click or drag images here</p>
-          </label>
+          </label> */}
 
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
