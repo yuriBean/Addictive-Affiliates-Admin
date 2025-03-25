@@ -17,8 +17,9 @@ export async function middleware(request) {
       if (!productData) return NextResponse.next();
 
       const metaTags = `
-        <meta property="og:title" content="${productData.name || 'Check this out!'}" />
+        <meta property="og:title" content="${productData.name || 'Track, optimize, and scale your campaigns with ease.'}" />
         <meta property="og:url" content="${productData.productUrl || url.toString()}" />
+        <meta property="og:image" content="${productData.image || 'https://addictiveaffiliates.com/logo.png'}" />
       `;
 
       return new NextResponse(`
