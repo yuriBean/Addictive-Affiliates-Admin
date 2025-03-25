@@ -1,14 +1,50 @@
-//protected routing: to be implemented
 import { NextResponse } from 'next/server';
-import { verifyToken } from './lib/auth'; 
+import { getAffiliateLink, getProduct } from '@/app/firebase/firestoreService';
 
 export async function middleware(request) {
-  const url = request.url;
+  const url = new URL(request.url);
+  const pathname = url.pathname;
 
-  const token = request.cookies.get('auth_token'); 
-  
-  if (url.includes('/dashboard') && !token) {
-    return NextResponse.redirect(new URL('/login', url)); 
+  if (pathname.startsWith('/track')) {
+    const linkId = url.searchParams.get('linkId');
+    if (!linkId) return NextResponse.next();
+
+    try {
+      const linkData = await getAffiliateLink(linkId);
+      if (!linkData) return NextResponse.next();
+
+      const productData = await getProduct(linkData.productId, linkData.campaignId);
+      if (!productData) return NextResponse.next();
+
+      const metaTags = `
+        <meta property="og:title" content="${productData.name || 'Check this out!'}" />
+        <meta property="og:url" content="${productData.productUrl || url.toString()}" />
+      `;
+
+      return new NextResponse(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          ${metaTags}
+          <title>${productData.name || "Redirecting..."}</title>
+          <script>
+            setTimeout(() => {
+              window.location.href = "${linkData.productUrl}";
+            }, 2000);
+          </script>
+        </head>
+        <body>
+          <p>Redirecting to <a href="${linkData.productUrl}">${productData.name}</a>...</p>
+        </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html' } });
+      
+    } catch (error) {
+      console.error("Error generating link preview:", error);
+      return NextResponse.next();
+    }
   }
 
   return NextResponse.next();
