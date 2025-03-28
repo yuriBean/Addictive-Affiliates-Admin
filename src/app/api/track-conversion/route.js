@@ -19,6 +19,6 @@ export async function POST(req) {
     }, { status: 200 });
   } catch (error) {
     console.error("Error tracking conversion:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({  success: false,  message: "Missing required fields." }, { status: 500 });
   }
 }

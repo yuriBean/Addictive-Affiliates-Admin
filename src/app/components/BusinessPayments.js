@@ -135,7 +135,7 @@ export default function BusinessPayments() {
         </div>
       </section>
 
-      <div className="flex flex-col space-y-6 justify-center">
+      {/* <div className="flex flex-col space-y-6 justify-center">
         <h2 className="text-secondary font-semibold text-xl">Payment Method</h2>
         <form  className="space-y-4">
           <div className="flex flex-wrap gap-4">
@@ -186,7 +186,7 @@ export default function BusinessPayments() {
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 
         </form>
-      </div>
+      </div> */}
 
       <div className="my-8 md:my-4 space-y-3">
         <h2 className="text-secondary font-semibold text-xl">Requests</h2>
