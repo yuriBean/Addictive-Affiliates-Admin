@@ -259,15 +259,7 @@ export const updateProductStatus = async (productId, campaignId, isActive) => {
   }
 };
 
-export const getAllProducts = async () => {
-  try {
-    const productsSnapshot = await getDocs(collectionGroup(db, "campaignProducts"));
-    return productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    throw error;
-  }
-};
+
 
 export const getProductsByCampaign = async (campaignId) => {
   try {

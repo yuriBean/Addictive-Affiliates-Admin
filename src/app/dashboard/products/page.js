@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-import AffiliateProducts from "@/app/components/AffiliateProducts";
-import BusinessProducts from "@/app/components/BusinessProducts";
 import { getUser } from "@/app/firebase/firestoreService";
+import Products from "@/app/components/Products";
 
 export default function ProductPage() { 
   const {user} = useAuth();
@@ -21,10 +20,8 @@ export default function ProductPage() {
 
   return (
     <>
-          {userRole === "affiliate" ? (
-            <AffiliateProducts />
-          ) : (
-            <BusinessProducts />
+          {userRole === "admin" && (
+            <Products />
           )}
 
     </>

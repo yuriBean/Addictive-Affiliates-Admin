@@ -2,8 +2,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState } from "react";
 import { getUser } from "@/app/firebase/firestoreService";
-import DashboardPage from "../components/AffiliateDashboard";
-import BusinessDashboardPage from "../components/BusinessDashboard";
+import AdminDashboardPage from "../components/AdminDashboard";
 
 export default function Dashboard() {
   const {user} = useAuth();
@@ -24,9 +23,14 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
-    
      getUserRole();
-  }, [user]);
+    }, [user]);
+
+    useEffect(() => {
+      if (!user) return;
+  
+       console.log(userRole);
+      }, [userRole]);
 
   if (loading) {
     return <div className="text-center text-black">Loading...</div>;
@@ -34,10 +38,8 @@ export default function Dashboard() {
 
     return (
       <>
-      {userRole === "affiliate" ? (
-        <DashboardPage />
-      ) : (
-        <BusinessDashboardPage />
+      {userRole === "admin" && (
+        <AdminDashboardPage />
       )}
       </>
     );

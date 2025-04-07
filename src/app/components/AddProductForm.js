@@ -6,6 +6,7 @@ import { addProduct, getAllUserCampaigns, getUser } from "@/app/firebase/firesto
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { uploadMediaFiles } from "./UploadImage";
+import { getAllCampaigns } from "../firebase/adminServices";
 
 export default function AddProductForm() {
   const { user } = useAuth();
@@ -21,7 +22,7 @@ export default function AddProductForm() {
     pricePerAction: "",
     assignedCampaign: "",
     assignedCampaignName: "",
-    userId: user?.uid || "",
+    userId: "",
     isActive: false,
     images: [],
   });
@@ -44,7 +45,7 @@ export default function AddProductForm() {
     const fetchCampaigns = async () => {
       try {
         setLoading(true);
-        const campaignList = await getAllUserCampaigns(user.uid);
+        const campaignList = await getAllCampaigns();
         setCampaigns(campaignList);
         if (!campaignList.length > 0){
           setErrorMessage("Create a campaign before adding products.");
@@ -79,12 +80,12 @@ export default function AddProductForm() {
   
     if (name === "assignedCampaign") {
       const selectedCampaign = campaigns.find((campaign) => campaign.id === value);
-  
       setFormData((prevData) => ({
         ...prevData,
         assignedCampaign: value,
         assignedCampaignName: selectedCampaign ? selectedCampaign.campaignName : "",
         pricePerAction: selectedCampaign ? selectedCampaign.pricePerAction : "", 
+        userId: selectedCampaign ? selectedCampaign.userId : "",
       }));
     } else {
       setFormData((prevData) => ({
@@ -138,6 +139,7 @@ export default function AddProductForm() {
 
 
   const handleSubmit = async (event) => {
+  
     event.preventDefault();
     if (!user) {
       setErrorMessage("You must be logged in to add a product.");
@@ -154,6 +156,7 @@ export default function AddProductForm() {
     setErrorMessage("");
 
     try {
+
       await addProduct(formData.assignedCampaign, formData);
       alert("Product added successfully!");
 
@@ -166,7 +169,7 @@ export default function AddProductForm() {
         description: "",
         assignedCampaign: "",
         assignedCampaignName: "",
-        userId: user.uid, 
+        userId: "", 
         pricePerAction: "",
         isActive: false,
         images: [],

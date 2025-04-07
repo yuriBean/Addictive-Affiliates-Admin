@@ -176,7 +176,7 @@ const Sidebar = () => {
                                             </li>
                                         </a>
 
-                            <a href={`/dashboard/payments`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                            {/* <a href={`/dashboard/payments`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                 <li className='flex gap-1 items-center'>
                                     <FontAwesomeIcon icon={faCreditCard} className='text-xl ml-2' />
                                     <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
@@ -210,18 +210,18 @@ const Sidebar = () => {
                                     Help
                                     </button>
                                 </li>
-                            </a>
+                            </a> */}
                         </ul>
                     </nav>
 
                     <div className="mt-auto text-md md:text-xl">
-                        <a
+                        {/* <a
                                         href='/dashboard/profile'
                                         className="flex items-center w-full py-2 px-4 rounded transition duration-300"
                                     >
                                         <FontAwesomeIcon icon={faUser} className="mr-2" />
                                         Profile
-                                    </a>
+                                    </a> */}
                         <button
                             onClick={handleLogout}
                             className="flex items-center w-full py-2 px-4 rounded transition duration-300"

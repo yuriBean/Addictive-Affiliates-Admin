@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretLeft, faCaretRight, faEdit, faTrash, faToggleOn, faToggleOff } from "@fortawesome/free-solid-svg-icons";
-import { deleteProduct, getProductsByUser, updateProductStatus } from "@/app/firebase/firestoreService";
+import { faCaretLeft, faCaretRight, faTrash, faToggleOn, faToggleOff, faCheck, faX } from "@fortawesome/free-solid-svg-icons";
+import { deleteProduct } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { getAllProducts, updateProductStatus } from "../firebase/adminServices";
 
-export default function BusinessProducts() { 
+export default function Products() { 
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,7 +15,6 @@ export default function BusinessProducts() {
   const [error, setError] = useState("");
   const [toggling, setToggling] = useState(null);
   const productsPerPage = 5;
-  const router = useRouter();
 
   useEffect(() => {
     if (!user) return;
@@ -23,7 +22,7 @@ export default function BusinessProducts() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const productList = await getProductsByUser(user.uid);
+        const productList = await getAllProducts();
         console.log("Fetched Products:", productList); 
 
         setProducts(productList);
@@ -62,7 +61,7 @@ export default function BusinessProducts() {
     }
   }
 
-  const toggleProductStatus = async (campaignId, productId, isActive) => {
+  const toggleProductStatus = async (productId, campaignId, isActive) => {
     if (toggling) return; 
     setToggling(productId);
   
@@ -82,9 +81,35 @@ export default function BusinessProducts() {
     }
   };
 
+  const handleDisapprove = async (productId, campaignId, isDisapproved) => {
+    try {
+      if (typeof window !== "undefined") {
+        const confirmationMessage = isDisapproved
+          ? "Are you sure you want to reapprove this product?"
+          : "Are you sure you want to disapprove this product?";
+  
+        const isConfirmed = window.confirm(confirmationMessage);
+  
+        if (isConfirmed) {
+          await updateProductStatus(productId, campaignId, false, !isDisapproved);
+          
+          setProducts((prev) =>
+            prev.map((product) =>
+              product.id === productId
+                ? { ...product, isActive: false, isDisapproved: !isDisapproved }
+                : product
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update product status.", err);
+    }
+  };  
+
   return (
     <div className="text-black mx-auto max-w-screen">
-      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE YOUR PRODUCTS</h1>
+      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE PRODUCTS</h1>
       <div className="my-6 text-left md:text-right">
         <Link href="/dashboard/add-product" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Product</Link>
       </div>
@@ -112,22 +137,31 @@ export default function BusinessProducts() {
                     </Link>
                     </td>
                   <td className="px-4 py-2">
-                    <FontAwesomeIcon
-                      icon={product.isActive ? faToggleOn : faToggleOff}
-                      className={`cursor-pointer text-2xl md:text-4xl ${
-                        toggling === product.id ? "opacity-50 cursor-not-allowed" : "text-secondary"
-                      }`}
-                      onClick={() =>
-                        toggling === null && toggleProductStatus(product.assignedCampaign, product.id, product.isActive)
+                  <FontAwesomeIcon
+                    icon={product.isActive ? faToggleOn : faToggleOff}
+                    className={`text-4xl ${
+                      product.isDisapproved
+                        ? "opacity-50 cursor-not-allowed" 
+                        : toggling === product.id
+                        ? "opacity-50 cursor-not-allowed"
+                        : "text-secondary cursor-pointer"
+                    }`}
+                    onClick={() => {
+                      if (!product.isDisapproved && toggling === null) {
+                        toggleProductStatus(product.id, product.assignedCampaign, product.isActive);
                       }
-                    />
+                    }}
+                  />
                   </td>
                   <td className="px-4 py-2">${product.price || product.pricePerAction}</td>
                   <td className="px-4 py-2">{product.assignedCampaignName}</td>
                   <td className="px-4 py-2 flex justify-around items-center">
-                  <Link href={`/dashboard/edit-product?productId=${product.id}&campaignId=${product.assignedCampaign}`} passHref>
-                    <FontAwesomeIcon icon={faEdit} className="cursor-pointer" />
-                  </Link>
+                  <FontAwesomeIcon
+                    icon={product.isDisapproved ? faCheck : faX}
+                    className="cursor-pointer"
+                    title={product.isDisapproved ? "Reapprove" : "Disapprove"}
+                    onClick={() => handleDisapprove(product.id, product.assignedCampaign, product.isDisapproved)}
+                  />
                     <FontAwesomeIcon icon={faTrash} className="cursor-pointer text-red-500" onClick={() => handleDelete(product.assignedCampaign, product.id)} />
                   </td>
                 </tr>

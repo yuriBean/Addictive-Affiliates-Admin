@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretLeft, faCaretRight, faEdit, faTrash, faToggleOn, faToggleOff } from "@fortawesome/free-solid-svg-icons";
-import { deleteCampaign, getAllUserCampaigns, updateCampaignStatus } from "@/app/firebase/firestoreService";
+import { faCaretLeft, faCaretRight, faTrash, faToggleOn, faToggleOff, faCheck, faCross, faX } from "@fortawesome/free-solid-svg-icons";
+import { deleteCampaign } from "@/app/firebase/firestoreService";
+import { updateCampaignStatus } from "../firebase/adminServices";
 import { useAuth } from "@/app/context/AuthContext";
+import { getAllCampaigns } from "../firebase/adminServices";
 
-export default function BuinessCampaigns() {
+export default function Campaigns() {
 
   const { user } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
@@ -22,7 +24,7 @@ export default function BuinessCampaigns() {
     const fetchCampaigns = async () => {
       try {
         setLoading(true);
-        const campaignList = await getAllUserCampaigns(user.uid);
+        const campaignList = await getAllCampaigns(user.uid);
         setCampaigns(campaignList);
       } catch (err) {
         setError("Failed to fetch campaigns.");
@@ -45,12 +47,12 @@ export default function BuinessCampaigns() {
   }  
   if (error) return <p className="text-red-500">{error}</p>;
 
-  const toggleCampaignStatus = async (campaignId, isActive) => {
+  const toggleCampaignStatus = async (userId, campaignId, isActive) => {
     if (toggling) return; 
     setToggling(campaignId);
   
     try {
-      await updateCampaignStatus(user.uid, campaignId, !isActive);
+      await updateCampaignStatus(userId, campaignId, !isActive);
   
       setCampaigns((prev) =>
         prev.map((campaign) =>
@@ -65,13 +67,13 @@ export default function BuinessCampaigns() {
     }
   };
 
-  const handleDelete = async (campaignId) => {
+  const handleDelete = async (userId, campaignId) => {
     try {
       if (typeof window !== "undefined") {
         const isConfirmed = window.confirm("Are you sure you want to delete?");
         
         if (isConfirmed) {
-          await deleteCampaign(user.uid, campaignId);
+          await deleteCampaign(userId, campaignId);
           setCampaigns((prev) => prev.filter((campaign) => campaign.id !== campaignId));
         }
       }
@@ -80,9 +82,35 @@ export default function BuinessCampaigns() {
     }
   };
     
+  const handleDisapprove = async (userId, campaignId, isDisapproved) => {
+    try {
+      if (typeof window !== "undefined") {
+        const confirmationMessage = isDisapproved
+          ? "Are you sure you want to reapprove this campaign?"
+          : "Are you sure you want to disapprove this campaign?";
+  
+        const isConfirmed = window.confirm(confirmationMessage);
+  
+        if (isConfirmed) {
+          await updateCampaignStatus(userId, campaignId, false, !isDisapproved);
+          
+          setCampaigns((prev) =>
+            prev.map((campaign) =>
+              campaign.id === campaignId
+                ? { ...campaign, isActive: false, isDisapproved: !isDisapproved }
+                : campaign
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update campaign status.", err);
+    }
+  };  
+  
   return (
     <div className="text-black mx-auto max-w-screen">
-      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE YOUR CAMPAIGNS</h1>
+      <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE CAMPAIGNS</h1>
       <div className="my-6 text-left md:text-right">
       <Link href="/dashboard/add-campaign" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Campaign</Link>
       </div>
@@ -92,6 +120,7 @@ export default function BuinessCampaigns() {
             <thead>
               <tr className="border-b text-sm md:text-lg">
                 <th className="px-4 py-2 text-left bg-accent rounded">Name</th>
+                <th className="px-4 py-2 text-left bg-accent rounded">User</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Active</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Start Date</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">End Date</th>
@@ -110,16 +139,24 @@ export default function BuinessCampaigns() {
                   </Link>
                   </td>
                   <td className="px-4 py-2">
-                    <FontAwesomeIcon
-                      icon={campaign.isActive ? faToggleOn : faToggleOff}
-                      className={`cursor-pointer text-4xl ${
-                        toggling === campaign.id ? "opacity-50 cursor-not-allowed" : "text-secondary"
-                      }`}
-                      onClick={() =>
-                        toggling === null && toggleCampaignStatus(campaign.id, campaign.isActive)
+                    {campaign.userId || "N/A"}
+                  </td>
+                  <td className="px-4 py-2">
+                  <FontAwesomeIcon
+                    icon={campaign.isActive ? faToggleOn : faToggleOff}
+                    className={`text-4xl ${
+                      campaign.isDisapproved
+                        ? "opacity-50 cursor-not-allowed" 
+                        : toggling === campaign.id
+                        ? "opacity-50 cursor-not-allowed"
+                        : "text-secondary cursor-pointer"
+                    }`}
+                    onClick={() => {
+                      if (!campaign.isDisapproved && toggling === null) {
+                        toggleCampaignStatus(campaign.userId, campaign.id, campaign.isActive);
                       }
-                      
-                    />
+                    }}
+                  />
                   </td>
                   <td className="px-4 py-2">
                     {campaign.startDate ? new Date(campaign.startDate).toLocaleDateString() : "N/A"}
@@ -127,12 +164,15 @@ export default function BuinessCampaigns() {
                   <td className="px-4 py-2">
                     {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "Ongoing"}
                   </td>
-                  <td className="px-4 py-2">{campaign.commissionRate}</td>
-                  <td className="px-4 py-2 flex justify-around">
-                  <Link href={`/dashboard/edit-campaign?id=${campaign.id}`} passHref>
-                    <FontAwesomeIcon icon={faEdit} className="cursor-pointer" />
-                  </Link>
-                    <FontAwesomeIcon icon={faTrash} className="cursor-pointer text-red-500" onClick={() => handleDelete(campaign.id)} />
+                  <td className="px-4 py-2">{campaign.commissionRate || 0 }%</td>
+                  <td className="px-4 py-2 flex justify-around items-center">
+                  <FontAwesomeIcon
+                    icon={campaign.isDisapproved ? faCheck : faX}
+                    className="cursor-pointer"
+                    title={campaign.isDisapproved ? "Reapprove" : "Disapprove"}
+                    onClick={() => handleDisapprove(campaign.userId, campaign.id, campaign.isDisapproved)}
+                  />
+                    <FontAwesomeIcon icon={faTrash} title="Delete" className="cursor-pointer text-red-500" onClick={() => handleDelete(campaign.userId, campaign.id)} />
                   </td>
                 </tr>
               ))}

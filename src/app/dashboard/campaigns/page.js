@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import AffiliateCampaigns from '@/app/components/AffiliateCampaigns'
 import { getUser } from "@/app/firebase/firestoreService";
-import BusinessCampaigns from '@/app/components/BusinessCampaigns'
 import { useAuth } from "@/app/context/AuthContext";
+import Campaigns from "@/app/components/Campaigns";
 
 export default function CampaignsPage() {
   const {user} = useAuth();
@@ -21,10 +20,8 @@ export default function CampaignsPage() {
 
   return (
     <>
-    {userRole === "affiliate" ? (
-      <AffiliateCampaigns />
-    ) : (
-      <BusinessCampaigns />
+    {userRole === "admin" && (
+      <Campaigns />
     )}
     </>
 );

@@ -6,6 +6,7 @@ import { addCampaign, getStripeAccount, getUser } from "@/app/firebase/firestore
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { getUsersByRole } from "@/app/firebase/adminServices";
 
 export default function AddCampaign() {
   const { user } = useAuth();
@@ -19,12 +20,14 @@ export default function AddCampaign() {
     pricePerAction:"",
     isActive: false,
     ongoing: false,
-    userId: user?.uid,
+    userId: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [stripeAccountId, setStripeAccountId] = useState(null);
+  const [businessUsers, setBusinessUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -55,8 +58,22 @@ export default function AddCampaign() {
       }
   };
 
+  const fetchBusinesses = async () => {
+    try{
+      setLoading(true);
+      const businesses = await getUsersByRole("business");
+      console.log(businesses);
+      setBusinessUsers(businesses);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
     fetchUserRole();
     checkStripeAccount();
+    fetchBusinesses();
   }, [user]);
 
   useEffect (()=>{
@@ -98,6 +115,12 @@ export default function AddCampaign() {
     }));
   };  
 
+  const handleUserSelect = (event) => {
+    const selectedUid = event.target.value;
+    const user = businessUsers.find(business => business.userId === selectedUid);
+    setSelectedUser(user || null);
+  };
+    
   const handleToggle = () => {
     setFormData((prevData) => ({
       ...prevData,
@@ -117,9 +140,7 @@ export default function AddCampaign() {
     if (formData.paymentType === "ppc" && (isNaN(formData.pricePerAction) || formData.pricePerAction <= 0)) {
       return "Price per click must be a positive number.";
     } 
-    if (formData.paymentType === "ppcv" && (isNaN(formData.pricePerAction) || formData.pricePerAction <= 0)) {
-      return "Price per conversion must be a positive number.";
-    }
+
     if (formData.paymentType === "ppj" && (isNaN(formData.pricePerAction) || formData.pricePerAction <= 0)) {
       return "Price per join must be a positive number.";
     }
@@ -151,9 +172,10 @@ export default function AddCampaign() {
       const campaignData = {
         ...formData,
         pricePerAction: formData.pricePerAction, 
+        userId: selectedUser.userId,
       };
 
-      const campaignId = await addCampaign(user.uid, campaignData);
+      const campaignId = await addCampaign(selectedUser.userId, campaignData);
       alert("Campaign added successfully!");
 
       router.push(`/dashboard/campaigns/${campaignId}`);
@@ -173,6 +195,31 @@ export default function AddCampaign() {
 
       <div className="flex flex-col space-y-6 justify-center">
         <form onSubmit={handleSubmit} className="space-y-4">
+
+     <div>
+        <small>Assign User</small>
+        {businessUsers.length > 0 && (
+          <select
+            onChange={handleUserSelect}
+            className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
+            required
+          >
+            <option value="">Select a user</option>
+            {businessUsers
+            .map((business) => (
+              <option key={business.userId} value={business.userId}>
+                {business.businessName} ({business.email})
+              </option>
+            ))}
+          </select>
+        )}
+
+        {selectedUser && (
+          <p className="text-sm mt-2">Selected User: {selectedUser.businessName}</p>
+        )}
+      </div>
+
+
           <div>
           <small>Campaign Name</small>
             <input
@@ -217,10 +264,12 @@ export default function AddCampaign() {
               min={0}
               max={100}
               required = {formData.paymentType === "ppcv"}
+              disabled={formData.paymentType === "ppc" || formData.paymentType === "ppj"}
             />
           </div>
 
-          <div>
+          <div className="overflow-hidden transition-all duration-300 ease-in-out" 
+            style={{ maxHeight: formData.paymentType === "ppcv" ? "0px" : "100px", opacity: formData.paymentType === "ppcv" ? 0 : 1 }}>       
           <small>Price Per Action</small>
             <input
               type="number"
@@ -229,7 +278,8 @@ export default function AddCampaign() {
               onChange={handleChange}
               className="w-full p-4 sm:p-6 bg-accent rounded-md placeholder-gray-700"
               placeholder="Price Per Click/Join"
-              required
+              required = {formData.paymentType === "ppc" || formData.paymentType === "ppj"}
+              disabled={formData.paymentType === "ppcv"}
             />
           </div>
 
