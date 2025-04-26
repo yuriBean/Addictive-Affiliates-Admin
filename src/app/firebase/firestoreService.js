@@ -185,6 +185,18 @@ export const updateCampaignStatus = async (userId, campaignId, isActive) => {
   }
 };
 
+export const updateCampaignPaymentStatus = async (userId, campaignId, paid) => {
+  try { 
+    const campaignRef = doc(db, "campaigns", userId, "userCampaigns", campaignId);
+    if(paid){
+      await updateDoc(campaignRef, { status: "pending_payment" });
+    }
+    console.log("Campaign updated successfully!");
+  } catch (error) {
+    console.error("Error updating campaign status:", error);
+  }
+};
+
 export const addProduct = async (campaignId, productData) => {
   try {
     const productRef = collection(db, "products", campaignId, "campaignProducts"); 

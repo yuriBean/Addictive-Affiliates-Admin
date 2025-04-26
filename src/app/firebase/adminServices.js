@@ -128,7 +128,7 @@ export const getAllCampaigns = async () => {
   }
 };
 
-export const updateCampaignStatus = async (userId, campaignId, isActive = null, isDisapproved = null) => {
+export const updateCampaignStatus = async (userId, campaignId, isActive = null, status) => {
   try {
     const campaignRef = doc(db, "campaigns", userId, "userCampaigns", campaignId);
     const campaignSnap = await getDoc(campaignRef);
@@ -141,15 +141,15 @@ export const updateCampaignStatus = async (userId, campaignId, isActive = null, 
     const campaignData = campaignSnap.data();
     let updateData = {};
 
-    if (isDisapproved !== null) {
-      updateData.isDisapproved = isDisapproved;
+    if (status !== null) {
+      updateData.status = status;
 
-      if (isDisapproved) {
+      if (status === "pending_approval") {
         updateData.isActive = false; 
       }
     }
 
-    if (isActive !== null && !campaignData.isDisapproved) {
+    if (isActive !== null && campaignData.status !== "pending_approval") {
       updateData.isActive = isActive;
     }
 

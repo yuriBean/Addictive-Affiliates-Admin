@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft, faCaretRight, faTrash, faToggleOn, faToggleOff, faCheck, faCross, faX } from "@fortawesome/free-solid-svg-icons";
-import { deleteCampaign } from "@/app/firebase/firestoreService";
+import { deleteCampaign, updateCampaignPaymentStatus } from "@/app/firebase/firestoreService";
 import { updateCampaignStatus } from "../firebase/adminServices";
 import { useAuth } from "@/app/context/AuthContext";
 import { getAllCampaigns } from "../firebase/adminServices";
@@ -82,31 +82,45 @@ export default function Campaigns() {
     }
   };
     
-  const handleDisapprove = async (userId, campaignId, isDisapproved) => {
+  const handleApprovalChange = async (userId, campaignId, action) => {
     try {
       if (typeof window !== "undefined") {
-        const confirmationMessage = isDisapproved
-          ? "Are you sure you want to reapprove this campaign?"
-          : "Are you sure you want to disapprove this campaign?";
+        let confirmMessage = "";
   
-        const isConfirmed = window.confirm(confirmationMessage);
+        if (action === "approve") {
+          confirmMessage = "Approve this campaign?";
+        } else if (action === "disapprove") {
+          confirmMessage = "Are you sure you want to disapprove this campaign?";
+        }
+  
+        const isConfirmed = window.confirm(confirmMessage);
   
         if (isConfirmed) {
-          await updateCampaignStatus(userId, campaignId, false, !isDisapproved);
-          
-          setCampaigns((prev) =>
-            prev.map((campaign) =>
-              campaign.id === campaignId
-                ? { ...campaign, isActive: false, isDisapproved: !isDisapproved }
-                : campaign
-            )
-          );
+          if (action === "approve") {
+            await updateCampaignStatus(userId, campaignId, true, "pending_payment");
+            setCampaigns((prev) =>
+              prev.map((campaign) =>
+                campaign.id === campaignId
+                  ? { ...campaign, status: "pending_payment", isActive: true }
+                  : campaign
+              )
+            );
+          } else if (action === "disapprove") {
+            await updateCampaignStatus(userId, campaignId, false, "pending_approval"); 
+            setCampaigns((prev) =>
+              prev.map((campaign) =>
+                campaign.id === campaignId
+                  ? { ...campaign, status: "pending_approval", isActive: false }
+                  : campaign
+              )
+            );
+          }
         }
       }
     } catch (err) {
       console.error("Failed to update campaign status.", err);
     }
-  };  
+  };    
   
   return (
     <div className="text-black mx-auto max-w-screen">
@@ -125,6 +139,7 @@ export default function Campaigns() {
                 <th className="px-4 py-2 text-left bg-accent rounded">Start Date</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">End Date</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">CR</th>
+                <th className="px-4 py-2 text-left bg-accent rounded">Status</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Action</th>
               </tr>
             </thead>
@@ -165,12 +180,13 @@ export default function Campaigns() {
                     {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "Ongoing"}
                   </td>
                   <td className="px-4 py-2">{campaign.commissionRate || 0 }%</td>
+                  <td className="px-4 py-2">{campaign.status }</td>
                   <td className="px-4 py-2 flex justify-around items-center">
                   <FontAwesomeIcon
-                    icon={campaign.isDisapproved ? faCheck : faX}
+                    icon={campaign.status === "pending_approval" ? faCheck : faX}
                     className="cursor-pointer"
-                    title={campaign.isDisapproved ? "Reapprove" : "Disapprove"}
-                    onClick={() => handleDisapprove(campaign.userId, campaign.id, campaign.isDisapproved)}
+                    title={campaign.status === "pending_approval" ? "Approve" : "Disapprove"}
+                    onClick={() => handleApprovalChange(campaign.userId, campaign.id, campaign.status === "pending_approval" ? "approve" : "disapprove")}
                   />
                     <FontAwesomeIcon icon={faTrash} title="Delete" className="cursor-pointer text-red-500" onClick={() => handleDelete(campaign.userId, campaign.id)} />
                   </td>
