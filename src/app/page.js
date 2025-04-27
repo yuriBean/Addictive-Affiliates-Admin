@@ -1,29 +1,28 @@
 "use client"
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import RoleSelection from "./components/RoleSelection";
-import ContactSection from "./components/ContactSection";
-import Footer from "./components/Footer";
+import { useRouter } from "next/navigation";
+import LoginPage from "./login/page";
 
 export default function Home() {
+  const router = useRouter();
+  const handleClick = () => {
+    router.push('/login');
+  }
   return (
 
-    <>
-     <div
-        className="relative min-h-screen"
-      >
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-no-repeat z-[-1] bg-left bg-fixed md:bg-contain md:bg-scroll"
-          style={{ backgroundImage: 'url(/Vector.png)' }}
-        ></div>
-        
-        <Navbar />
-        <Hero />
-      </div>
-    <RoleSelection />
-    <ContactSection />
-    <Footer /> 
-  </>
+    <div className="text-white flex flex-col text-center item-center justify-center min-h-screen max-w-screen bg-primary">
+      <div className="space-y-10">
+    <h1 className="text-5xl">
+    Welcome, Admin!
+
+    </h1>
+    <button
+    className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold "
+      onClick={handleClick}>
+    Click to Login
+
+    </button>
+    </div>
+    </div>
 
    
   );
