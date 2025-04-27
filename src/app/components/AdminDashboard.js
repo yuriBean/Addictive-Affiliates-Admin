@@ -93,8 +93,8 @@ export default function AdminDashboardPage() {
             <FontAwesomeIcon icon={faMoneyBill} className="text-lg"/>
             <p className="text-xl font-bold mt-2">Total Revenue</p>
             <p className="text-sm text-gray-500">
-                ${stats.revenue}
-              </p>
+            ${parseFloat(stats?.revenue)?.toFixed(2)}
+            </p>
             </div>
           </div>
         </section>
