@@ -1,12 +1,13 @@
 "use client";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addProduct, getAllUserCampaigns, getUser } from "@/app/firebase/firestoreService";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { uploadMediaFiles } from "./UploadImage";
 import { getAllCampaigns } from "../firebase/adminServices";
+import { v4 as uuidv4 } from "uuid";
 
 export default function AddProductForm() {
   const { user } = useAuth();
