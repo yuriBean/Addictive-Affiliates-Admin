@@ -11,6 +11,12 @@ import { getAllCampaigns } from "../firebase/adminServices";
 export default function AddProductForm() {
   const { user } = useAuth();
   const router = useRouter();
+  const [productId] = useState(uuidv4());
+  const [imageFiles, setImageFiles] = useState([]);
+  const [videoFile, setVideoFile] = useState(null);
+  const [otherFiles, setOtherFiles] = useState([]);
+  const MAX_TOTAL_SIZE = 1 * 1024 * 1024 * 1024; 
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     productName: "",
@@ -24,7 +30,8 @@ export default function AddProductForm() {
     assignedCampaignName: "",
     userId: "",
     isActive: false,
-    images: [],
+    media: [],
+    files: [],
   });
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -95,28 +102,56 @@ export default function AddProductForm() {
     }
   };
   
-  // const handleMediaUpload = async (event) => {
-  //   const files = Array.from(event.target.files);
+  const handleMediaSelect = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
   
-  //   if (files.length === 0) return;
+    let newImageFiles = [...imageFiles];
+    let newOtherFiles = [...otherFiles];
+    let newVideoFile = videoFile;
   
-  //   setLoading(true);
-  //   setErrorMessage("");
+    for (const file of files) {
+      const fileType = file.type;
   
-  //   try {
-  //     const uploadedFiles = await uploadMediaFiles(files);
-  //     setFormData((prevData) => ({
-  //       ...prevData,
-  //       images: [...prevData.images, ...uploadedFiles.map((file) => file.url)],
-  //     }));
-  //   } catch (error) {
-  //     setErrorMessage("Failed to upload files. Please try again.");
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      if (fileType.startsWith("image/")) {
+        if (newImageFiles.length >= 5) {
+          setErrorMessage("You can upload up to 5 images only.");
+          return;
+        }
+        newImageFiles.push(file);
+      } else if (fileType.startsWith("video/")) {
+        if (newVideoFile) {
+          setErrorMessage("Only 1 video is allowed.");
+          return;
+        }
+        newVideoFile = file;
+      } else {
+        if (newOtherFiles.length >= 2) {
+          setErrorMessage("You can upload up to 2 additional files only.");
+          return;
+        }
+        newOtherFiles.push(file);
+      }
+    }
   
+    const totalSize = [...newImageFiles, ...newOtherFiles, newVideoFile ? [newVideoFile] : []]
+      .flat()
+      .reduce((acc, curr) => acc + curr.size, 0);
+  
+    if (totalSize > MAX_TOTAL_SIZE) {
+      setErrorMessage("Total upload size cannot exceed 1GB.");
+      return;
+    }
+  
+    setImageFiles(newImageFiles);
+    setVideoFile(newVideoFile);
+    setOtherFiles(newOtherFiles);
+    setErrorMessage("");
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
+  };  
 
   const validateForm = () => {
     if (!formData.productName.trim()) return setErrorMessage("Product name is required.");
@@ -137,6 +172,13 @@ export default function AddProductForm() {
     return "";
   };
 
+  const handleRemoveImage = (indexToRemove) => {
+    setImageFiles((prevFiles) => prevFiles.filter((_, i) => i !== indexToRemove));
+  };
+
+  const handleRemoveOtherFile = (indexToRemove) => {
+    setOtherFiles((prev) => prev.filter((_, i) => i !== indexToRemove));
+  };  
 
   const handleSubmit = async (event) => {
   
@@ -156,6 +198,26 @@ export default function AddProductForm() {
     setErrorMessage("");
 
     try {
+      const mediaFiles = [...imageFiles];
+      if (videoFile) mediaFiles.push(videoFile);
+
+      const otherUploadedFiles = [...otherFiles];
+
+
+      const uploadedMedia = mediaFiles.length > 0
+      ? await uploadMediaFiles(mediaFiles, user.uid, formData.assignedCampaign, productId)
+      : [];
+    
+      const uploadedFiles = otherUploadedFiles.length > 0
+      ? await uploadMediaFiles(otherUploadedFiles, user.uid, formData.assignedCampaign, productId)
+      : [];
+            
+      const finalFormData = {
+        ...formData,
+        id: productId,
+        media: uploadedMedia,
+        files: uploadedFiles,
+      };
 
       await addProduct(formData.assignedCampaign, formData);
       alert("Product added successfully!");
@@ -172,8 +234,12 @@ export default function AddProductForm() {
         userId: "", 
         pricePerAction: "",
         isActive: false,
-        images: [],
-      });
+        media: [],
+        files: [],
+        });
+        setImageFiles([]);
+        setVideoFile(null);
+        setOtherFiles([]);
 
       router.push("/dashboard/products");
     } catch (error) {
@@ -253,7 +319,7 @@ export default function AddProductForm() {
           >
             <option value="">Select Campaign</option>
             {campaigns
-            .filter((campaign) => campaign.paymentType === formData.paymentType)
+            .filter((campaign) => campaign.paymentType === formData.paymentType && campaign.status === "active")
             .map((campaign) => (
               <option key={campaign.id} value={campaign.id}>
                 {campaign.campaignName} -- Pay Per Action: ${campaign.pricePerAction}
@@ -302,17 +368,65 @@ export default function AddProductForm() {
           />
         </div>
         
-          {/* <label className="w-64 h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
+        <label className="w-full h-32 md:h-48 flex flex-col items-center justify-center border-2 border-dashed border-gray-500 rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200">
           <input
-              type="file"
-              multiple
-              accept="image/*,video/*,.pdf,.doc,.docx"
-              onChange={handleMediaUpload}
-              className="w-full p-4 bg-accent rounded-md placeholder-gray-700"
-            />
-            <FontAwesomeIcon icon={faUpload} className="text-2xl md:text-4xl" />
-            <p className="text-gray-600 mt-2">Click or drag images here</p>
-          </label> */}
+            type="file"
+            multiple
+            accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+            onChange={handleMediaSelect}
+            className="hidden"
+          />
+          <FontAwesomeIcon icon={faUpload} className="text-2xl md:text-4xl" />
+          <p className="text-gray-600 mt-2">Click or drag images here</p>
+        </label>
+        <div className="flex flex-wrap gap-2 mt-4">
+            {imageFiles.map((file, index) => (
+              <div key={`img-${index}`} className="relative w-24 h-24">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`Selected image ${index + 1}`}
+                  className="w-full h-full object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+
+            {videoFile && (
+              <div key="video" className="relative w-24 h-24">
+                <video
+                  src={URL.createObjectURL(videoFile)}
+                  className="w-full h-full object-cover rounded-md"
+                  controls
+                />
+                <button
+                  type="button"
+                  onClick={() => setVideoFile(null)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {otherFiles.map((file, index) => (
+              <div key={`file-${index}`} className="relative w-24 h-24 flex flex-col items-center justify-center bg-gray-300 rounded-md p-2 text-xs text-center">
+                <span className="truncate w-20">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveOtherFile(index)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
 
           {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
 

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft, faCaretRight, faTrash, faToggleOn, faToggleOff, faCheck, faCross, faX } from "@fortawesome/free-solid-svg-icons";
-import { deleteCampaign, updateCampaignPaymentStatus } from "@/app/firebase/firestoreService";
+import { deleteCampaign, updateCampaignPaymentStatus, getUser } from "@/app/firebase/firestoreService";
 import { updateCampaignStatus } from "../firebase/adminServices";
 import { useAuth } from "@/app/context/AuthContext";
 import { getAllCampaigns } from "../firebase/adminServices";
@@ -17,6 +17,7 @@ export default function Campaigns() {
   const [error, setError] = useState("");
   const [toggling, setToggling] = useState(null);
   const campaignsPerPage = 5;
+  const [userEmails, setUserEmails] = useState({});
 
   useEffect(() => {
     if (!user) return; 
@@ -26,6 +27,12 @@ export default function Campaigns() {
         setLoading(true);
         const campaignList = await getAllCampaigns(user.uid);
         setCampaigns(campaignList);
+        const emails = {};
+        for (const campaign of campaignList) {
+          const user = await getUser(campaign.userId);
+          emails[campaign.userId] = user.email;
+        }
+        setUserEmails(emails);
       } catch (err) {
         setError("Failed to fetch campaigns.");
         console.error(err);
@@ -154,7 +161,7 @@ export default function Campaigns() {
                   </Link>
                   </td>
                   <td className="px-4 py-2">
-                    {campaign.userId || "N/A"}
+                  {userEmails[campaign.userId] || "N/A"} 
                   </td>
                   <td className="px-4 py-2">
                   <FontAwesomeIcon
