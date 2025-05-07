@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOut, faHome, faHamburger, faGear, faQuestionCircle, faContactBook, faCreditCard, faBullhorn, faUser, faTag } from '@fortawesome/free-solid-svg-icons';
+import { faSignOut, faHome, faHamburger, faGear, faQuestionCircle, faContactBook, faCreditCard, faBullhorn, faUser, faTag, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
     const { user } = useAuth();
@@ -83,16 +83,16 @@ const Sidebar = () => {
                                         </a>
 
 
-                                        <a href={`/dashboard/payments`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                                        <a href={`/dashboard/users`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                             <li className='flex gap-1 items-center'>
-                                                <FontAwesomeIcon icon={faCreditCard} className='text-xl ml-2' />
+                                                <FontAwesomeIcon icon={faUserGroup} className='text-xl ml-2' />
                                                 <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
-                                                    Payment
+                                                    Users
                                                 </button>
                                             </li>
                                         </a>
 
-                                        <a href={`/contact`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                                        {/* <a href={`/contact`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                             <li className='flex gap-1 items-center'>
                                                 <FontAwesomeIcon icon={faContactBook} className='text-xl ml-2' />
                                                 <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
@@ -117,7 +117,7 @@ const Sidebar = () => {
                                                     Help
                                                 </button>
                                             </li>
-                                        </a>
+                                        </a>*/}
                                     </ul>
                                 </nav>
 
@@ -137,7 +137,7 @@ const Sidebar = () => {
                                         <FontAwesomeIcon icon={faSignOut} className="mr-2" />
                                         Logout
                                     </button>
-                                </div>
+                                </div> 
                             </aside>
                         </div>
                 </>
@@ -176,15 +176,15 @@ const Sidebar = () => {
                                             </li>
                                         </a>
 
-                            {/* <a href={`/dashboard/payments`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
+                            <a href={`/dashboard/users`} className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                 <li className='flex gap-1 items-center'>
-                                    <FontAwesomeIcon icon={faCreditCard} className='text-xl ml-2' />
+                                    <FontAwesomeIcon icon={faUserGroup} className='text-xl ml-2' />
                                     <button className="flex justify-between items-center w-full py-2 px-4 transition duration-300">
-                                    Payment
+                                    Users
                                     </button>
                                 </li>
                             </a>
-
+{/* 
                             <a href='/contact' className='flex items-center  p-2 rounded-3xl hover:bg-[#DFD9F1] hover:text-primary'>
                                 <li className='flex gap-1 items-center'>
                                     <FontAwesomeIcon icon={faContactBook} className='text-xl ml-2' />

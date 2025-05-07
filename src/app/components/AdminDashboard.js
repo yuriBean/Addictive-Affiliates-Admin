@@ -67,14 +67,17 @@ export default function AdminDashboardPage() {
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Statistics</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6 flex justify-between items-center ">
+            <Link href={'/dashboard/users'}>
             <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
             <p className="text-sm">Total Businesses</p>
             <p className="text-2xl font-bold">{stats.businesses}</p>
-              </div>
+              </div></Link>
+            <Link href={'/dashboard/users'}>
               <div className="mb-6 space-y-2 col-span-1 bg-accent p-6 rounded-lg">
               <p className="text-sm">Total Affiliates</p>
                 <p className="text-2xl font-bold">{stats.affiliates}</p>
               </div>
+              </Link>
             </div>
 
             <section className="mb-12">

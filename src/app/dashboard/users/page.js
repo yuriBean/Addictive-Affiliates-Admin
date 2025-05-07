@@ -15,6 +15,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const usersPerPage = 5;
+  const [roleFilter, setRoleFilter] = useState("all");
 
   useEffect(() => {
     if (!user) return; 
@@ -43,10 +44,14 @@ export default function Users() {
   
   }, [user]);
   
-  const totalPages = Math.ceil(users.length / usersPerPage);
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const filteredUsers = roleFilter === "all"
+  ? users
+  : users.filter((user) => user.role === roleFilter);
+
+const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+const indexOfLastUser = currentPage * usersPerPage;
+const indexOfFirstUser = indexOfLastUser - usersPerPage;
+const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
   if (loading) {
     return <div className="text-center text-black">Loading...</div>;
@@ -105,10 +110,20 @@ export default function Users() {
   return (
     <div className="text-black mx-auto max-w-screen">
       <h1 className="text-headings text-2xl md:text-3xl font-bold my-4">MANAGE USERS</h1>
-      {/* <div className="my-6 text-left md:text-right">
-      <Link href="/dashboard/add-campaign" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Campaign</Link>
-      </div> */}
       <div className="flex flex-col space-y-6 justify-center">
+      <div className="flex items-center space-x-4 mb-4">
+              <label className="text-md font-semibold">Filter by role:</label>
+              <select
+                className="border border-gray-300 rounded px-3 py-2"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="affiliate">Affiliates</option>
+                <option value="business">Businesses</option>
+              </select>
+            </div>
+
         <div className="my-4 overflow-x-auto">
           <table className="min-w-full table-auto mt-4 border-separate border-spacing-3">
             <thead>

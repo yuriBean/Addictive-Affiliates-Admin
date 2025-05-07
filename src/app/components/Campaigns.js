@@ -146,7 +146,7 @@ export default function Campaigns() {
                 <th className="px-4 py-2 text-left bg-accent rounded">Start Date</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">End Date</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">CR</th>
-                <th className="px-4 py-2 text-left bg-accent rounded">Status</th>
+                {/* <th className="px-4 py-2 text-left bg-accent rounded">Status</th> */}
                 <th className="px-4 py-2 text-left bg-accent rounded">Action</th>
               </tr>
             </thead>
@@ -189,12 +189,12 @@ export default function Campaigns() {
                   <td className="px-4 py-2">{campaign.commissionRate || 0 }%</td>
                   <td className="px-4 py-2">{campaign.status }</td>
                   <td className="px-4 py-2 flex justify-around items-center">
-                  <FontAwesomeIcon
+                  {/*<FontAwesomeIcon
                     icon={campaign.status === "pending_approval" ? faCheck : faX}
                     className="cursor-pointer"
                     title={campaign.status === "pending_approval" ? "Approve" : "Disapprove"}
                     onClick={() => handleApprovalChange(campaign.userId, campaign.id, campaign.status === "pending_approval" ? "approve" : "disapprove")}
-                  />
+                  />*/}
                     <FontAwesomeIcon icon={faTrash} title="Delete" className="cursor-pointer text-red-500" onClick={() => handleDelete(campaign.userId, campaign.id)} />
                   </td>
                 </tr>
