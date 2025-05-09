@@ -142,7 +142,7 @@ const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
               {currentUsers?.map((user) => (
                 <tr key={user.userId} className="border-b text-sm md:text-lg">
                   <td className="px-4 py-2">
-                  <Link href={`/dashboard/campaigns/${user.id}`} passHref>
+                  <Link href={`/dashboard/users/${user.userId}`} passHref>
                   {user.role === "affiliate" ? user.firstName + " " +user.lastName : user.businessName}
                   </Link>
                   </td>

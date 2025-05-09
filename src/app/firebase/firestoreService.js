@@ -1009,3 +1009,16 @@ export const getTotalEarningsByDate = async (userId) => {
     console.error("Error getting total earnings:", error);
   }
 };
+
+export async function getAffiliateAccount(userId) {
+  const q = query(collection(db, "accounts"), where("userId", "==", userId));
+  const snapshot = await getDocs(q);
+  return snapshot.empty ? null : snapshot.docs[0].data();
+}
+
+export async function getAffiliateLinksByUserId(userId) {
+  const q = query(collection(db, "affiliateLinks"), where("affiliateId", "==", userId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => doc.data());
+}
+
