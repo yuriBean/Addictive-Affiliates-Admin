@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { editCampaign, editProduct, getAffiliateLink, getProduct, updateAffiliateLinkStats } from "@/app/firebase/firestoreService";
+import { editCampaign, editProduct, getAffiliateLink, getCampaign, getProduct, updateAffiliateLinkStats } from "@/app/firebase/firestoreService";
 
 export default function Track() {
   const searchParams = useSearchParams();
@@ -21,16 +21,17 @@ export default function Track() {
         await updateAffiliateLinkStats(linkId, {
           clicks: (linkData.clicks || 0) + 1
         });
-
-        await editProduct(linkData.campaignId, linkData.productId, {
-          clicks: (linkData.clicks || 0) + 1
-        })
-
-        await editCampaign(linkData.businessId, linkData.campaignId, {
-          clicks: (linkData.clicks || 0) + 1
-        })
-
+        
         const productData = await getProduct(linkData.productId, linkData.campaignId);
+        await editProduct(linkData.campaignId, linkData.productId, {
+          clicks: (productData.clicks || 0) + 1
+        });
+        
+        const campaignDoc = await getCampaign(linkData.businessId, linkData.campaignId);
+        await editCampaign(linkData.businessId, linkData.campaignId, {
+          clicks: (campaignDoc.clicks || 0) + 1
+        });
+        
         if (productData && ["ppc", "ppj"].includes(productData.paymentType)) {
           await fetch("/api/track-conversion", {
             method: "POST",

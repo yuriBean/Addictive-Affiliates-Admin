@@ -6,6 +6,8 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState } from "react";
 import { getTotalConversions, getTotalRevenue, getTotalClicks, getTotalAffiliates, getTotalBusinesses, getPendingPayouts, getTopCampaigns, getTopProducts } from "@/app/firebase/adminServices";
 import Link from "next/link";
+import TopCampaignsTable from "./TopCampaignsTable";
+import TopProductsTable from "./TopProductsTable";
 
 export default function AdminDashboardPage() {
   const {user} = useAuth();
@@ -22,20 +24,31 @@ export default function AdminDashboardPage() {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return null;
 
     const fetchData = async () => {
       try {
         setLoading(true);
-        const totalConversions = await getTotalConversions();
-        const totalRevenue = await getTotalRevenue();
-        const totalClicks = await getTotalClicks();
-        const totalAffiliates = await getTotalAffiliates();
-        const totalBusinesses = await getTotalBusinesses();
-        const pendingPayouts = await getPendingPayouts();
-        const topCampaigns = await getTopCampaigns();
-        const topProducts = await getTopProducts();
-        setStats(() => ({
+        const [
+          totalConversions,
+          totalRevenue,
+          totalClicks,
+          totalAffiliates,
+          totalBusinesses,
+          pendingPayouts,
+          topCampaigns,
+          topProducts
+        ] = await Promise.all([
+          getTotalConversions(),
+          getTotalRevenue(),
+          getTotalClicks(),
+          getTotalAffiliates(),
+          getTotalBusinesses(),
+          getPendingPayouts(),
+          getTopCampaigns(),
+          getTopProducts()
+        ]);
+          setStats(() => ({
           conversions: totalConversions,
           revenue: totalRevenue,
           clicks: totalClicks,
@@ -104,80 +117,8 @@ export default function AdminDashboardPage() {
 
         </section>
     
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4">Top Campaigns</h2>
-          <div className="my-6 text-left md:text-right">
-              <Link href="/dashboard/add-campaign" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Campaign</Link>
-            </div>
-          <div className="bg-white p-6 rounded-lg border border-1 border-gray-300 shadow-lg">
-          <div className="overflow-x-auto">
-            <table className="md:min-w-full table-auto">
-              <thead>
-                <tr className="text-left border-b border-1 border-gray-200">
-                  <th className="p-5 border-b">Campaign Name</th>
-                  <th className="p-5 border-b">Revenue</th>
-                  <th className="p-5 border-b">Conversions</th>
-                  <th className="p-5 border-b">Clicks</th>
-                  <th className="p-5 border-b">CR</th>
-                </tr>
-              </thead>
-              
-              <tbody className="text-gray-500">
-                {stats?.topCampaigns.map((campaign) => (
-                  <tr key={campaign.id}>
-                    <td className="p-5 border-b text-black">{campaign.campaignName}</td>
-                    <td className="p-2 border-b text-black">
-                      <span className="bg-[#E8EDF2] rounded-md p-2 px-4 font-semibold">
-                        ${campaign?.revenue?.toFixed(2) || 0.00}
-                      </span>
-                    </td>
-                    <td className="p-5 border-b">{campaign.conversions || 0}</td>
-                    <td className="p-5 border-b">{campaign.clicks || 0}</td>
-                    <td className="p-5 border-b">{campaign.conversionRate || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </section>
-
-        <section className="mb-12">
-          <h2 className="text-xl font-semibold mb-4">Top Products</h2>
-          <div className="my-6 text-left md:text-right">
-              <Link href="/dashboard/add-product" className="bg-secondary text-white p-3 md:p-4 text-sm md:text-md rounded-lg font-bold">Add Product</Link>
-            </div>
-          <div className="bg-white p-6 rounded-lg border border-1 border-gray-300 shadow-lg">
-          <div className="overflow-x-auto">
-            <table className="md:min-w-full table-auto">
-              <thead>
-                <tr className="text-left border-b border-1 border-gray-200">
-                  <th className="p-5 border-b">Product Name</th>
-                  <th className="p-5 border-b">Revenue</th>
-                  <th className="p-5 border-b">Conversions</th>
-                  <th className="p-5 border-b">Clicks</th>
-                  <th className="p-5 border-b">CR</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-500">
-                {stats?.topProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td className="p-5 border-b text-black">{product.productName}</td>
-                    <td className="p-2 border-b text-black">
-                      <span className="bg-[#E8EDF2] rounded-md p-2 px-4 font-semibold">
-                        ${product?.revenue?.toFixed(2) || 0.00}
-                      </span>
-                    </td>
-                    <td className="p-5 border-b">{product.conversions || 0}</td>
-                    <td className="p-5 border-b">{product.clicks || 0}</td>
-                    <td className="p-5 border-b">{product.conversionRate || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </section>
+        <TopCampaignsTable campaigns={stats.topCampaigns} />
+        <TopProductsTable products={stats.topProducts} />
 
       </div>
     );

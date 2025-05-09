@@ -73,8 +73,8 @@ export const getTopCampaigns = async () => {
     const campaigns = campaignsSnapshot.docs.map(doc => {
       const data = doc.data();
       const conversions = data.conversions || 0;
-      const clicks = data.clicks || 1; 
-      const conversionRate = ((conversions / clicks) * 100).toFixed(2);
+      const clicks = data.clicks || 0; 
+      const conversionRate = clicks > 0 ? ((conversions / clicks) * 100).toFixed(2) : "0.00";
       
       return {
         id: doc.id,
@@ -99,8 +99,8 @@ export const getTopProducts = async () => {
     const products = productsSnapshot.docs.map(doc => {
       const data = doc.data();
       const conversions = data.conversions || 0;
-      const clicks = data.clicks || 1; 
-      const conversionRate = ((conversions / clicks) * 100).toFixed(2);
+      const clicks = data.clicks || 0; 
+      const conversionRate = clicks > 0 ? ((conversions / clicks) * 100).toFixed(2) : "0.00";
       
       return {
         id: doc.id,
@@ -288,4 +288,24 @@ export const disableUser = async (userId, isDisabled) => {
   } catch (error) {
     console.error("Failed to update Firestore user status:", error);
   }
+};
+
+export const getAffiliateStats = async (affiliateId) => {
+  const q = query(collection(db, "affiliateLinks"), where("affiliateId", "==", affiliateId));
+  const snapshot = await getDocs(q);
+
+  let totalLinks = 0;
+  let totalClicks = 0;
+  let totalConversions = 0;
+  let totalRevenue = 0;
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    totalLinks += 1;
+    totalClicks += data.clicks || 0;
+    totalConversions += data.conversions || 0;
+    totalRevenue += data.revenue || 0;
+  });
+
+  return { totalLinks, totalClicks, totalConversions, totalRevenue };
 };

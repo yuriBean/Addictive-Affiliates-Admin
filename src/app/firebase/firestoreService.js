@@ -122,17 +122,19 @@ export const getCampaign = async (userId, campaignId) => {
 
 export const getCampaignById = async (campaignId) => {
   try {
-    const users = await getAllUsers();
-    for (const user of users) {
-      const campaigns = await getAllUserCampaigns(user.userId);
-      const matchedCampaign = campaigns.find(campaign => campaign.id === campaignId);
-      if (matchedCampaign) {
-        return matchedCampaign;
-      }
+
+    const indexDoc = await getDoc(doc(db, "campaignIndex", campaignId));
+
+    if (!indexDoc.exists()) {
+      console.log("Campaign index not found.");
+      return null;
     }
 
-    console.log("Campaign not found.");
-    return null;
+    const { userId } = indexDoc.data();
+
+    const campaign = await getCampaign(userId, campaignId);
+
+    return campaign;
   } catch (error) {
     console.error("Error fetching campaign:", error);
     throw error;

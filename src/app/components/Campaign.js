@@ -80,7 +80,7 @@ export default function Campaign() {
             <thead>
               <tr className="border-b text-sm md:text-lg">
                 <th className="px-4 py-2 text-left bg-accent rounded">Product Name</th>
-                <th className="px-4 py-2 text-left bg-accent rounded">Price</th>
+                <th className="px-4 py-2 text-left bg-accent rounded" title="Commission Rate / Price Per Action">CR/Price</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Clicks</th>
                 <th className="px-4 py-2 text-left bg-accent rounded">Revenue</th>
               </tr>
@@ -96,9 +96,15 @@ export default function Campaign() {
                       {product.productName.length > 20 ? product.productName.slice(0, 25) + "..." : product.productName}
                       </Link>
                     </td>
-                    <td className="px-4 py-2">
-                      ${product.price ? product.price : "N/A"}
-                    </td>
+                    {product?.paymentType === "ppcv" ? (
+                          <td className="px-4 py-2">
+                                {product?.commissionRate}%
+                          </td>
+                        ) : (
+                          <td className="px-4 py-2">
+                                ${product?.pricePerAction}
+                          </td>
+                        )}
                     <td className="px-4 py-2">{product.clicks ?? "N/A"}</td>
                     <td className="px-4 py-2">
                       {product.revenue ? product.revenue : "N/A"}

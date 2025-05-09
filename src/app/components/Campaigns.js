@@ -187,7 +187,7 @@ export default function Campaigns() {
                     {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "Ongoing"}
                   </td>
                   <td className="px-4 py-2">{campaign.commissionRate || 0 }%</td>
-                  <td className="px-4 py-2">{campaign.status }</td>
+                  {/* <td className="px-4 py-2">{campaign.status }</td> */}
                   <td className="px-4 py-2 flex justify-around items-center">
                   {/*<FontAwesomeIcon
                     icon={campaign.status === "pending_approval" ? faCheck : faX}
